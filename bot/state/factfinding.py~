@@ -1,4 +1,0 @@
-from state import State
-
-class FindGossip(State):
-    pass
