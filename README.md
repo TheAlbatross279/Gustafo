@@ -1,8 +1,4 @@
-Gustafo
-=======
-
 #CSC 481: Knowledge Based System Chatbot aka Gustafo
-
 
 ## Adding New States
 Here is an example of a very simple greeting state:
