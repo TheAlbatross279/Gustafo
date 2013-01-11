@@ -2,6 +2,9 @@
 
 Gustafo is a chatbot that helps answer programming questions in addition to having a great personality.
 
+Gustafo relies on a knowledge resource from [Stack Overflow](http://stackoverflow.com/) and will help you find the answer to your programming questions by using magical question answering techniques and a little bit of NLP voodoo to process your question and help you find the answer you're looking for. 
+
+If you get bored of programming questions, Gustafo also doubles as a surrogate friend who will ask you how you're doing and pretend to listen to you. 
 
 ## Adding New States
 Here is an example of a very simple greeting state:
