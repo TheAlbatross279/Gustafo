@@ -1,5 +1,8 @@
 #CSC 481: Knowledge Based System Chatbot aka Gustafo
 
+Gustafo is a chatbot that helps answer programming questions in addition to having a great personality.
+
+
 ## Adding New States
 Here is an example of a very simple greeting state:
 
