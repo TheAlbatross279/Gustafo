@@ -35,7 +35,7 @@ import time #mainly for the sleep() function
 from datetime import datetime
 import re
 
-class TestBot(SingleServerIRCBot):
+class IRCAdapter(SingleServerIRCBot):
     def __init__(self, linkbot, channel, nickname, server, port=6667):
         SingleServerIRCBot.__init__(self, [(server, port)], nickname, nickname)
         self.channel = channel

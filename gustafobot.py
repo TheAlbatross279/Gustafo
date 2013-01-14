@@ -1,11 +1,11 @@
 from bot import Bot
-from ircadapter import TestBot
-from state.state import State
-from state.outreach import InitialOutreach
-from state.solicitresponse import SolicitResponse
-from state.giveupstate import GiveUpState
-from state.factfinding import FindGossip
-from state.solicituser import SolicitUser
+from adapters import IRCAdapter
+from bot.state.state import State
+from bot.state.outreach import InitialOutreach
+from bot.state.solicitresponse import SolicitResponse
+from bot.state.giveupstate import GiveUpState
+from bot.state.factfinding import FindGossip
+from bot.state.solicituser import SolicitUser
 from database.dbsetup import Database
 from threading import Timer
 import random
@@ -21,7 +21,7 @@ class GustafoBot(Bot):
       self.idle = {}
       self.resumeState = {}
 
-      self.adapter = TestBot(self, channel, nickname, server, port)
+      self.adapter = IRCAdapter(self, channel, nickname, server, port)
       self.adapter.start()
 
    def forget(self):
