@@ -2,7 +2,7 @@ import sqlite3
 
 class Database(object):
     def __init__(self):
-        self.connection = sqlite3.connect('database/gossip.db')
+        self.connection = sqlite3.connect('db/gossip.db')
         self.c = self.connection.cursor()
 
     def add_row(self, values):

@@ -6,7 +6,7 @@ from bot.state.solicitresponse import SolicitResponse
 from bot.state.giveupstate import GiveUpState
 from bot.state.factfinding import FindGossip
 from bot.state.solicituser import SolicitUser
-from database.dbsetup import Database
+from db.dbsetup import Database
 from threading import Timer
 import random
 import time

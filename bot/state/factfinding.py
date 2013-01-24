@@ -1,6 +1,6 @@
 from state import State
-from database.fact import Fact
-from database.dbsetup import Database
+from db.fact import Fact
+from db.dbsetup import Database
 
 class FindGossip(State):
 

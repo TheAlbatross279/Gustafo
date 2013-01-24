@@ -1,6 +1,6 @@
 from gossip import Gossip
 from state import State
-from database.dbsetup import Database
+from db.dbsetup import Database
 class RespondGossip(Gossip):
     @staticmethod
     def recognize(msg):

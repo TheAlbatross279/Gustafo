@@ -6,8 +6,8 @@ the gossip was told. If the user wants to know gossip about another person,
 the class will not gossip about this person. 
 """
 from state import State
-from database.dbsetup import Database
-from database.fact import Fact
+from db.dbsetup import Database
+from db.fact import Fact
 import random
 
 class Gossip(State):
