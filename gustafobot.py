@@ -1,4 +1,5 @@
 from bot import Bot
+from adapters.ircadapter import *
 from adapters import IRCAdapter
 from bot.state.state import State
 from bot.state.outreach import InitialOutreach
@@ -15,14 +16,11 @@ class GustafoBot(Bot):
    CHAT = 0
    TIMEOUT = 30.0
 
-   def __init__(self, channel, nickname, server, port):
-      Bot.__init__(self) 
+   def __init__(self, adapter, db=None):
+      Bot.__init__(self, adapter, db) 
 
       self.idle = {}
       self.resumeState = {}
-
-      self.adapter = IRCAdapter(self, channel, nickname, server, port)
-      self.adapter.start()
 
    def forget(self):
       for timer in self.idle.values():
@@ -47,6 +45,16 @@ class GustafoBot(Bot):
       to_send = nick + ": " + msg
 
       self.adapter.send_message(to_send)
+
+   def on_event(self, event, data={}):
+      if event is USER_JOIN:
+         self.on_user_join(data['nick'], time.time())
+      elif event is USER_EXIT:
+         self.on_user_exit(data['nick'], time.time())
+      elif event is JOIN:
+         self.on_join()
+      elif event is DIE:
+         self.die()
 
    def on_user_join(self, nick, timestamp):
       print "##### JOIN #####"
@@ -126,7 +134,8 @@ class GustafoBot(Bot):
       if res is not None:
          self.send_message(nick, res) 
 
-   def on_message(self, user, timestamp, msg):
+   def on_message(self, user, msg):
+      timestamp = time.time()
       self.idle[GustafoBot.CHAT].cancel()
       if self.idle.get(user, None) is not None:
          self.idle[user].cancel()

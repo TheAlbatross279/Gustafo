@@ -2,6 +2,7 @@ import sys
 
 #import bot
 from gustafobot import GustafoBot
+from adapters import IRCAdapter
 
 def main():
    if len(sys.argv) != 4:
@@ -21,7 +22,8 @@ def main():
    channel = sys.argv[2]
    nickname = sys.argv[3]
 
-   GustafoBot(channel, nickname, server, port)
+   bot = GustafoBot(IRCAdapter(channel, nickname, server, port))
+   bot.start()
 
 if __name__ == "__main__":
    main()

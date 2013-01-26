@@ -29,21 +29,33 @@ The known commands are:
     dcc -- Let the bot invite you to a DCC CHAT connection.
 """
 #import irc bot
+from adapter import *
 from ircbot import SingleServerIRCBot
 from irclib import nm_to_n, nm_to_h, irc_lower, ip_numstr_to_quad, ip_quad_to_numstr
 import time #mainly for the sleep() function
 from datetime import datetime
 import re
 
-class IRCAdapter(SingleServerIRCBot):
-    def __init__(self, linkbot, channel, nickname, server, port=6667):
+JOIN = 0x1
+DIE = 0x2
+USER_JOIN = 0x3
+USER_EXIT = 0x4
+
+class IRCAdapter(Adapter, SingleServerIRCBot):
+    def __init__(self, channel, nickname, server, port=6667):
         SingleServerIRCBot.__init__(self, [(server, port)], nickname, nickname)
         self.channel = channel
         self.nickname = nickname
-        self.linkbot = linkbot
+
+    def start(self, bot):
+        super(IRCAdapter, self).start(bot)
+        SingleServerIRCBot.start(self)
 
     def send_message(self, msg):
         self.connection.privmsg(self.channel, msg)
+
+    def get_name(self):
+        return self.nickname
 
     def on_nicknameinuse(self, c, e):
         self.nickname = c.get_nickname() + "_"
@@ -51,19 +63,19 @@ class IRCAdapter(SingleServerIRCBot):
 
     def on_welcome(self, c, e):
         c.join(self.channel)
-        self.linkbot.on_join()
+        self.bot.on_event(JOIN)
 
     def on_join(self, c, e):
         src = e.source()
         nick = re.sub("!(.*)", "", src)
         if(nick != self.nickname):
-            self.linkbot.on_user_join(nick, datetime.today())
+            self.bot.on_event(USER_JOIN, {'nick': nick})
 
 
     def on_part(self, c, e):
         src = e.source()
         nick = re.sub("!(.*)", "", src)
-        self.linkbot.on_user_exit(nick, datetime.today())
+        self.bot.on_event(USER_EXIT, {'nick': nick})
 
     def on_privmsg(self, c, e):
         self.do_command(e, e.arguments()[0])
@@ -75,7 +87,7 @@ class IRCAdapter(SingleServerIRCBot):
             self.do_command(e, a[1].strip())
         elif len(a) > 1:
             nick = nm_to_n(e.source())
-            self.linkbot.on_chat(nick, a[0], a[1].strip())
+            self.bot.on_message(nick, a[1].strip())
 
     def get_users(self):
         if len(self.channels) > 0:
@@ -91,7 +103,7 @@ class IRCAdapter(SingleServerIRCBot):
             self.disconnect()
         elif cmd == "die":
             c.privmsg(self.channel, "You should hear what I learned about " + nick + " the other day...")
-            self.linkbot.die()
+            self.bot.on_event(DIE)
             self.die()
         elif cmd == "stats":
             for chname, chobj in self.channels.items():
@@ -106,10 +118,8 @@ class IRCAdapter(SingleServerIRCBot):
                 voiced = chobj.voiced()
                 voiced.sort()
                 c.notice(nick, "Voiced: " + ", ".join(voiced))
-        elif cmd == "forget":
-                self.linkbot.forget()
         else:
 #none of the commands match, pass the text to the response function defined above
 #but first sleep a little
-            self.linkbot.on_message(nick, 0, cmd)
+            self.bot.on_message(nick, cmd)
 
