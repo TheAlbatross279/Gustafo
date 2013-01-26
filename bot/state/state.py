@@ -45,7 +45,7 @@ class State:
 
    @staticmethod
    def query(nick, msg):
-      print msg
+      #print msg
 
       msg_tag = pos_tag(word_tokenize(msg))
 
@@ -55,12 +55,12 @@ class State:
       else:
          validStates = currentState.nextStates()
 
-      print currentState
+      #print currentState
 
 
       confidence = map(stateTest, [(msg_tag, state) for state in State.states if State.validateState(state, validStates)])
 
-      print confidence
+      #print confidence
 
       ((conf, context), state) = reduce(lambda x, y: x if x[0][0] > y[0][0] else y, confidence)
 
@@ -78,13 +78,13 @@ class State:
 
    @staticmethod
    def userJoin(user, timestamp):
-      print user + " joined the channel!"
+      #print user + " joined the channel!"
       for state in State.states:
          state.onUserJoin(user, timestamp)
 
    @staticmethod
    def userLeave(user, timestamp):
-      print user + " left the channel...." 
+      #print user + " left the channel...." 
       for state in State.states:
          state.onUserLeave(user, timestamp)
 

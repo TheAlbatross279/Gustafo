@@ -106,7 +106,7 @@ class Gossip(State):
                #update the knowers to include the user asking for gossip
                knowers = gossip[3].split("; ") 
                knowers.append(context['_nick'])
-               print knowers
+               #print knowers
                
                #add all users in the room to the knowers
                if State.users != None:
@@ -114,7 +114,7 @@ class Gossip(State):
                        knowers.append( user)
 
                knowers = set(knowers)
-               print knowers
+               #print knowers
                knowers = "; ".join(knowers)
                update_statement = "UPDATE facts SET knowers = \'" + knowers + \
                                   "\' WHERE author= \'" + gossip[0] + \

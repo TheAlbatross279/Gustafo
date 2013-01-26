@@ -82,26 +82,26 @@ class WikiState(State):
 
       page = urllib.quote('_'.join(context["name"]))
 
-      print page
+      #print page
 #      page = re.sub("[ ]", "_", page)
 
       link = prefix + page + "\""
-      print link
+      #print link
 
       os.system("wget -O wiki.tmp " + link)
 
       wiki_file = open('wiki.tmp')
       input_text = wiki_file.read()
-#      print input_text
+#      #print input_text
 
       wiki_file.close()
-      #print input_text
+      ##print input_text
 
       if not context['isBirthday']:
          #clean_wiki = re.compile("^\|[^\n]*|^:[^\n]*|^;[^\n]*|^\*[^\n]*|<ref[^>]*>[^<]*</ref>|</?ref[^/>]*/?>|\[\[File:[^\]]*\]]|\[\[[^\|\]]*\||\[\[|\]\]|<[^/>]*/>|<!--[^-]*-->|{{[^}\n]*}};?|}}|{{[^\n]*|'''|&nbsp;|</?nowiki>", re.M)
          #input_text = re.sub(clean_wiki, "", input_text)
          #input_text = re.sub(r'(?:.|\n)*\["\*"\]=>\n\W*string\(\d+\)\W*"', "", input_text, 1)
-         #print input_text[:5000]
+         ##print input_text[:5000]
          #input_text = input_text.split('\n')
          #input_text = [line for line in input_text if len(line) > 250]
          input_text = re.findall(r"<p>(.*?)<\/p>", input_text)
@@ -110,7 +110,7 @@ class WikiState(State):
 
          count = 0
          input_text_temp = nltk.util.clean_html(input_text[count])
-         print count, input_text_temp[0]
+         #print count, input_text_temp[0]
          while('^' in input_text_temp):
             count = count + 1
             input_text_temp = nltk.util.clean_html(input_text[count])
