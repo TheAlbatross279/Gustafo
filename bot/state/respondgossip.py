@@ -1,7 +1,9 @@
 from gossip import Gossip
 from state import State
-from db.dbsetup import Database
+from db import SQLiteConn
 class RespondGossip(Gossip):
+    db = SQLiteConn('db/gossip.db')
+
     @staticmethod
     def recognize(msg):
         tell_me_gossip = ["gossip", "secret"]
@@ -18,9 +20,7 @@ class RespondGossip(Gossip):
 
         #get all possible facts 
         query = '''SELECT * FROM facts'''
-        db = Database()
-        results = db.query(query)
-        db.close_conn()
+        results = RespondGossip.db.query(query)
 
         #generate a list of users mentioned in the db
         for result in results:

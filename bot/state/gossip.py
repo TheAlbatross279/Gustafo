@@ -6,11 +6,13 @@ the gossip was told. If the user wants to know gossip about another person,
 the class will not gossip about this person. 
 """
 from state import State
-from db.dbsetup import Database
+from db import SQLiteConn
 from db.fact import Fact
 import random
 
 class Gossip(State):
+    db = SQLiteConn('db/gossip.db')    
+
     @staticmethod
     def respond(context):
         subject = None
@@ -21,8 +23,7 @@ class Gossip(State):
                subject = context['subject']
         
            query = '''SELECT * FROM facts'''
-           db = Database()
-           temp_results = db.query(query)
+           temp_results = Gossip.db.query(query)
 
            results = [] 
            #remove results where asker is knower
@@ -33,7 +34,6 @@ class Gossip(State):
                    
            #if there is no gossip the user doesn't know
            if len(results) == 0:
-               db.close_conn()
                responses = ["You already know everything I know!",
 
                             "I can not believe you enjoy gossip as" \
@@ -61,7 +61,6 @@ class Gossip(State):
            if subject != None:
                #checks if user is in the room
                if State.users != None and subject in State.users:
-                   db.close_conn()
                    return "Oh, " + subject + " is just so nice... nothing to say about them!"
                else:
                    specific_results = []
@@ -77,7 +76,6 @@ class Gossip(State):
                                    specific_results.append(result)
                    #if you can't find any results
                    if len(specific_results) == 0:
-                       db.close_conn()
                        return "You already know everything I know about " + subject + "!"
                    #randomly select a specific fact
                    rand_ndx = random.randint(0, len(specific_results)-1)            
@@ -100,7 +98,6 @@ class Gossip(State):
                    gossip[0] + ", \"" + gossip[1] + "\"!"
            #if you didn't find any random facts
            if len(gossip) == 0:
-               db.close_conn()
                return "Hmmm... well, I don't really know anything right now...."
            else:
                #update the knowers to include the user asking for gossip
@@ -121,9 +118,8 @@ class Gossip(State):
                                   "\' AND msg= \'" + gossip[1] + \
                                   "\' AND recipient= \'" + gossip[2] + "\';" 
                                   
-               db.update(update_statement)
+               Gossip.db.query(update_statement, True)
                
-               db.close_conn()
                return response
         else:
             responses = ["Too bad... I had something really juicy!",
