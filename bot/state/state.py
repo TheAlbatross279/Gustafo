@@ -24,6 +24,8 @@ class State:
       if isInitial:
          State.initial_states.append(state)
 
+      state.init()
+
    @staticmethod
    def validateState(state, validStates):
       for e in validStates:
@@ -87,6 +89,10 @@ class State:
       #print user + " left the channel...." 
       for state in State.states:
          state.onUserLeave(user, timestamp)
+
+   @staticmethod
+   def init():
+      pass
 
    @staticmethod
    def recognize(msg):
