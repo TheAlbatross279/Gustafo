@@ -19,14 +19,14 @@ class OutreachState(State):
 
 class InitialOutreach(OutreachState):
    @staticmethod
-   def nextStates():
+   def next_states():
       return tuple([SecondaryOutreach])
 
 State.register(InitialOutreach)
 
 class OutreachResponse(OutreachState):
    @staticmethod
-   def nextStates():
+   def next_states():
       return tuple([InquiryState])
 
 State.register(OutreachResponse, True)

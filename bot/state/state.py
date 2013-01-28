@@ -1,18 +1,18 @@
 from multiprocessing import Pool, cpu_count
 from nltk import pos_tag, word_tokenize
 
-def stateTest((msg, state)):
+def state_test((msg, state)):
    return (state.recognize(msg), state)
 
 class State:
    users = []
    states = []
    initial_states = []
-   userState = {}
+   user_state = {}
 
    @staticmethod
    def forget():
-      State.userState = {}
+      State.user_state = {}
    
    @staticmethod
    def register(state, isInitial=False):
@@ -23,17 +23,17 @@ class State:
       state.init()
 
    @staticmethod
-   def validateState(state, validStates):
-      for e in validStates:
+   def validate_state(state, valid_states):
+      for e in valid_states:
          if issubclass(state, e):
             return True
 
       return False
 
    @staticmethod
-   def forceState(state, context={}):
+   def force_state(state, context={}):
       if context.get('_nick', None) is not None:
-         State.userState[context['_nick']] = state
+         State.user_state[context['_nick']] = state
 
       return state.respond(context)
 
@@ -43,29 +43,29 @@ class State:
 
       msg_tag = pos_tag(word_tokenize(msg))
 
-      currentState = State.userState.get(nick, None)
-      if currentState is None:
-         validStates = State.initial_states
+      current_state = State.user_state.get(nick, None)
+      if current_state is None:
+         valid_states = State.initial_states
       else:
-         validStates = currentState.nextStates()
+         valid_states = current_state.next_states()
 
-      #print currentState
+      #print current_state
 
 
-      confidence = map(stateTest, [(msg_tag, state) for state in State.states if State.validateState(state, validStates)])
+      confidence = map(state_test, [(msg_tag, state) for state in State.states if State.validate_state(state, valid_states)])
 
       #print confidence
 
       ((conf, context), state) = reduce(lambda x, y: x if x[0][0] > y[0][0] else y, confidence)
 
       if conf < 0.1:
-         if not nick in State.userState or State.userState[nick] != State:
-            State.userState[nick] = State
+         if not nick in State.user_state or State.user_state[nick] != State:
+            State.user_state[nick] = State
             return State.query(nick, msg)
          else:
             return None
 
-      State.userState[nick] = state
+      State.user_state[nick] = state
 
       context['_nick'] = nick
       return state.respond(context)
@@ -87,5 +87,5 @@ class State:
       pass
 
    @staticmethod
-   def nextStates():
+   def next_states():
       return tuple([State])

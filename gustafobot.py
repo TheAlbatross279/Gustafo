@@ -20,14 +20,14 @@ class GustafoBot(Bot):
       Bot.__init__(self, adapter, db) 
 
       self.idle = {}
-      self.resumeState = {}
+      self.resume_state = {}
 
    def forget(self):
       for timer in self.idle.values():
          timer.cancel()
 
       self.idle = {}
-      self.resumeState = {}
+      self.resume_state = {}
       State.forget()
 
       db = Database()
@@ -71,7 +71,7 @@ class GustafoBot(Bot):
                  'msg': msg,
                  'knowers': knowers}
 
-      State.forceState(FindGossip, context)
+      State.force_state(FindGossip, context)
 
    def on_user_exit(self, nick, timestamp):
       print "##### EXIT #####"
@@ -88,7 +88,7 @@ class GustafoBot(Bot):
                  'msg': msg,
                  'knowers': knowers}
 
-      State.forceState(FindGossip, context)
+      State.force_state(FindGossip, context)
 
    def on_join(self):
       self.idle[GustafoBot.CHAT] = Timer(GustafoBot.TIMEOUT, self.on_chat_inactive)
@@ -108,7 +108,7 @@ class GustafoBot(Bot):
       else:
          self.idle[GustafoBot.CHAT] = Timer(GustafoBot.TIMEOUT, self.on_chat_inactive)
 
-      res = State.forceState(InitialOutreach, {'_nick': user})
+      res = State.force_state(InitialOutreach, {'_nick': user})
       if res is not None:
          self.send_message(user, res)
 
@@ -118,17 +118,17 @@ class GustafoBot(Bot):
    def on_user_inactive(self, nick):
       State.users = self.adapter.get_users()
 
-      if State.userState[nick] is not SolicitResponse:
-         self.resumeState[nick] = State.userState[nick]
-         res = State.forceState(SolicitResponse, {'_nick': nick})
-         #res = State.forceState(SolicitUser,{'_nick': nick})
+      if State.user_state[nick] is not SolicitResponse:
+         self.resume_state[nick] = State.user_state[nick]
+         res = State.force_state(SolicitResponse, {'_nick': nick})
+         #res = State.force_state(SolicitUser,{'_nick': nick})
          self.idle[nick] = Timer(GustafoBot.TIMEOUT, self.on_user_inactive, [nick])
          self.idle[nick].start()
       else:
-         res = State.forceState(GiveUpState, {'_nick': nick})
-         del(State.userState[nick])
+         res = State.force_state(GiveUpState, {'_nick': nick})
+         del(State.user_state[nick])
          del(self.idle[nick])
-         if len(State.userState) == 0:
+         if len(State.user_state) == 0:
             self.idle[GustafoBot.CHAT] = Timer(10.0, self.on_chat_inactive)
             self.idle[GustafoBot.CHAT].start()
       if res is not None:
@@ -139,8 +139,8 @@ class GustafoBot(Bot):
       self.idle[GustafoBot.CHAT].cancel()
       if self.idle.get(user, None) is not None:
          self.idle[user].cancel()
-         if State.userState[user] is SolicitResponse:
-            State.userState[user] = self.resumeState[user]
+         if State.user_state[user] is SolicitResponse:
+            State.user_state[user] = self.resume_state[user]
 
       it = time.time()
 
@@ -170,4 +170,4 @@ class GustafoBot(Bot):
                  'msg': msg,
                  'knowers': knowers}
 
-      State.forceState(FindGossip, context)
+      State.force_state(FindGossip, context)

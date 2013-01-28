@@ -16,7 +16,7 @@ class SolicitResponse(State):
         return solicitations[rand_ndx]
 
     @staticmethod
-    def nextStates():
+    def next_states():
         return tuple([GiveUpState])
 
 State.register(SolicitResponse)

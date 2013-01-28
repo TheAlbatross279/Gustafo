@@ -18,7 +18,7 @@ class RedditState(State):
 
    @staticmethod
    def respond(context):
-      State.forceState(SolicitUser,{'_nick': context['_nick']})
+      State.force_state(SolicitUser,{'_nick': context['_nick']})
 
       solicitations = ["Do you want to hear some gossip?",
                        "Would you like me to tell you some gossip?",
@@ -29,7 +29,7 @@ class RedditState(State):
       return "Midnight. " + solicitations[rand_ndx]
 
    @staticmethod
-   def nextStates():
+   def next_states():
        return tuple([SolicitUser])
 
 State.register(RedditState, True)

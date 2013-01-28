@@ -27,7 +27,7 @@ class InquiryState(State):
    def respond(context):
       if context['type'] == 'well_being':
          InquiryState.responce_type = 1
-         State.forceState(SolicitUser,{'_nick': context['_nick']})
+         State.force_state(SolicitUser,{'_nick': context['_nick']})
          solicitations = ["Do you want to hear some gossip?",
                           "Would you like me to tell you some gossip?",
                           "I know something really interesting. Would you like to hear about it?",
@@ -47,7 +47,7 @@ class InquiryState(State):
          return 'Not much, what\'s up with you?'
 
    @staticmethod
-   def nextStates():
+   def next_states():
    #if InquiryState.responce_type:
       return tuple([SolicitUser])
 
