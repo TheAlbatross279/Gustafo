@@ -15,10 +15,6 @@ class State:
       State.userState = {}
    
    @staticmethod
-   def die():
-      pass
-
-   @staticmethod
    def register(state, isInitial=False):
       State.states.append(state)
       if isInitial:
@@ -40,10 +36,6 @@ class State:
          State.userState[context['_nick']] = state
 
       return state.respond(context)
-
-   @staticmethod
-   def monitor(t, f, msg):
-      pass
 
    @staticmethod
    def query(nick, msg):
@@ -79,21 +71,13 @@ class State:
       return state.respond(context)
 
    @staticmethod
-   def userJoin(user, timestamp):
-      #print user + " joined the channel!"
-      for state in State.states:
-         state.onUserJoin(user, timestamp)
-
-   @staticmethod
-   def userLeave(user, timestamp):
-      #print user + " left the channel...." 
-      for state in State.states:
-         state.onUserLeave(user, timestamp)
-
-   @staticmethod
    def init():
       pass
 
+   @staticmethod
+   def die():
+      pass
+ 
    @staticmethod
    def recognize(msg):
       return (0, {})
@@ -105,11 +89,3 @@ class State:
    @staticmethod
    def nextStates():
       return tuple([State])
-
-   @staticmethod
-   def onUserJoin(user, timestamp):
-      pass
-
-   @staticmethod
-   def onUserLeave(user, timestamp):
-      pass
