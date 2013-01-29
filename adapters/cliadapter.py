@@ -9,7 +9,11 @@ class CLIAdapter(Adapter):
       super(CLIAdapter, self).start(bot)
 
       while True:
-         line = raw_input("> ")
+         try:
+            line = raw_input("> ")
+         except(EOFError):
+            return
+
          if line == "quit":
             return
          self.bot.on_message("user", line)
