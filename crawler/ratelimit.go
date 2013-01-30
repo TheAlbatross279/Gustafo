@@ -17,7 +17,7 @@ const (
 )
 
 type StackExchangeClient interface {
-	Do(path string, v interface{}, params stackexchange.Params) (*stackexchange.Wrapper, error)
+	Do(path string, v interface{}, params *stackexchange.Params) (*stackexchange.Wrapper, error)
 }
 
 // RateLimitClient rate-limits requests sent to an underlying StackExchangeClient.
@@ -82,7 +82,7 @@ func (rlc *RateLimitClient) handle(req *apiRequest) {
 	}
 }
 
-func (rlc *RateLimitClient) Do(path string, v interface{}, params stackexchange.Params) (*stackexchange.Wrapper, error) {
+func (rlc *RateLimitClient) Do(path string, v interface{}, params *stackexchange.Params) (*stackexchange.Wrapper, error) {
 	c := make(chan *apiResponse)
 	rlc.c <- &apiRequest{
 		path:   path,
@@ -102,7 +102,7 @@ func (rlc *RateLimitClient) Close() error {
 type apiRequest struct {
 	path   string
 	v      interface{}
-	params stackexchange.Params
+	params *stackexchange.Params
 	c      chan *apiResponse
 }
 

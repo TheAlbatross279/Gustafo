@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"bitbucket.org/zombiezen/stackexchange"
+	"labix.org/v2/mgo"
 )
 
 // OAuth constants
@@ -21,13 +22,17 @@ const (
 var (
 	Site       = stackexchange.StackOverflow
 	OAuthToken = ""
+	Tag        = ""
 
 	Client StackExchangeClient
+	Mongo  *mgo.Database
 )
 
 func main() {
 	flag.StringVar(&Site, "site", Site, "the site name to scrape from")
 	flag.StringVar(&OAuthToken, "oauth", OAuthToken, "OAuth 2.0 token")
+	flag.StringVar(&Tag, "tag", Tag, "tag to scrape on")
+	mongoURL := flag.String("mongo", "localhost/gustafocrawler", "the URL for the MongoDB database")
 	flag.Parse()
 
 	if OAuthToken == "" {
@@ -44,6 +49,14 @@ func main() {
 	}
 
 	{
+		sess, err := mgo.Dial(*mongoURL)
+		if err != nil {
+			log.Fatalln("mongo connect failed:", err)
+		}
+		Mongo = sess.DB("")
+	}
+
+	{
 		rlc := NewRateLimitClient(&stackexchange.Client{
 			AccessToken: OAuthToken,
 			Key:         appKey,
@@ -52,21 +65,48 @@ func main() {
 		Client = rlc
 	}
 
-	var questions []stackexchange.Question
-	_, err := Client.Do("/questions", &questions, stackexchange.Params{
-		Site:     Site,
-		Sort:     stackexchange.SortActivity,
-		Order:    "desc",
-		PageSize: 10,
-	})
+	err := fetchBatch()
 	if err != nil {
 		log.Print(err)
-		return
 	}
-	fmt.Println("10 Most Recent:")
+}
+
+func fetchBatch() error {
+	questions, err := fetchQuestions(1, Tag)
+	if err != nil {
+		return err
+	}
+	// TODO: add questions to database
+
+	questionIDs := make([]int, len(questions))
 	for i := range questions {
-		q := &questions[i]
-		fmt.Printf("%d. %s (score=%d) %s\n", i+1, q.Title, q.Score, q.Link)
+		questionIDs[i] = questions[i].ID
 	}
-	fmt.Println()
+	answers, err := fetchQuestionAnswers(questionIDs)
+	if err != nil {
+		return err
+	}
+	// TODO: add answers to database
+
+	_, _ = questions, answers
+	return nil
+}
+
+func fetchQuestions(n int, tag string) ([]stackexchange.Question, error) {
+	var questions []stackexchange.Question
+	_, err := Client.Do(stackexchange.PathAllQuestions, &questions, &stackexchange.Params{
+		Site:     Site,
+		Tagged:   tag,
+		PageSize: n,
+	})
+	return questions, err
+}
+
+func fetchQuestionAnswers(ids []int) ([]stackexchange.Answer, error) {
+	var answers []stackexchange.Answer
+	_, err := Client.Do(stackexchange.PathQuestionAnswers, &answers, &stackexchange.Params{
+		Site: Site,
+		Args: []string{stackexchange.JoinIDs(ids)},
+	})
+	return answers, err
 }
