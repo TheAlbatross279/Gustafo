@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"os/signal"
 	"time"
 
 	"bitbucket.org/zombiezen/stackexchange"
@@ -31,6 +32,7 @@ var (
 	Site       = stackexchange.StackOverflow
 	OAuthToken = ""
 	Tag        = ""
+	PerCall    = 50
 )
 
 // Connections
@@ -43,6 +45,8 @@ func main() {
 	flag.StringVar(&Site, "site", Site, "the site name to scrape from")
 	flag.StringVar(&OAuthToken, "oauth", OAuthToken, "OAuth 2.0 token")
 	flag.StringVar(&Tag, "tag", Tag, "tag to scrape on")
+	flag.IntVar(&PerCall, "percall", PerCall, "# of questions to grab per heartbeat")
+	heartRate := flag.Duration("heartbeat", time.Minute, "time between scrapes for questions")
 	mongoURL := flag.String("mongo", "localhost/gustafocrawler", "the URL for the MongoDB database")
 	flag.Parse()
 
@@ -76,14 +80,33 @@ func main() {
 		Client = rlc
 	}
 
-	err := fetchBatch()
-	if err != nil {
-		log.Print(err)
+	heartbeat := time.Tick(*heartRate)
+	interrupt := make(chan os.Signal, 1)
+	signal.Notify(interrupt, os.Interrupt)
+	for {
+		select {
+		case <-interrupt:
+			return
+		default:
+			// keep calm and carry on
+		}
+
+		log.Println("heartbeat")
+		if err := fetchBatch(); err != nil {
+			log.Println("batch failed:", err)
+		}
+
+		select {
+		case <-heartbeat:
+			// still beating!
+		case <-interrupt:
+			return
+		}
 	}
 }
 
 func fetchBatch() error {
-	questions, err := fetchQuestions(1, Tag)
+	questions, err := fetchQuestions(50, Tag)
 	if err != nil {
 		return err
 	}
@@ -111,7 +134,6 @@ func fetchBatch() error {
 		questionIDs[i] = questions[i].ID
 	}
 	answers, err := fetchQuestionAnswers(questionIDs)
-	log.Println(len(answers), "answers")
 	if err != nil {
 		return err
 	}
