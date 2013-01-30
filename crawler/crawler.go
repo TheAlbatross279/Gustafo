@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -11,6 +12,7 @@ import (
 
 	"bitbucket.org/zombiezen/stackexchange"
 	"labix.org/v2/mgo"
+	"labix.org/v2/mgo/bson"
 )
 
 // OAuth parameters
@@ -25,6 +27,12 @@ const (
 const (
 	QuestionCollection = "questions"
 	AnswerCollection   = "answers"
+)
+
+// Filters
+const (
+	AllQuestionsFilter    = "!)QZFB_UZYOb1Jf*eWmfaRigq"
+	QuestionAnswersFilter = "!4.nQbWlQBREYlr6GF"
 )
 
 // Flags
@@ -112,19 +120,10 @@ func fetchBatch() error {
 	}
 	for i := range questions {
 		q := &questions[i]
-		_, err := Mongo.C(QuestionCollection).UpsertId(q.ID, Question{
-			ID:               q.ID,
-			AcceptedAnswerID: q.AcceptedAnswerID,
-			AnswerCount:      q.AnswerCount,
-			ClosedDate:       time.Time(q.ClosedDate),
-			ClosedReason:     q.ClosedReason,
-			Created:          time.Time(q.Created),
-			IsAnswered:       q.IsAnswered,
-			Link:             q.Link,
-			Score:            q.Score,
-			Title:            q.Title,
-		})
+		doc, err := json2bson(q)
 		if err != nil {
+			log.Printf("question (id=%d) ->BSON failed: %v", q.ID, err)
+		} else if _, err := Mongo.C(QuestionCollection).UpsertId(q.ID, doc); err != nil {
 			log.Printf("question (id=%d) upsert failed: %v", q.ID, err)
 		}
 	}
@@ -139,17 +138,10 @@ func fetchBatch() error {
 	}
 	for i := range answers {
 		a := &answers[i]
-		_, err := Mongo.C(AnswerCollection).UpsertId(a.ID, Answer{
-			ID:         a.ID,
-			Body:       a.Body,
-			Created:    time.Time(a.Created),
-			IsAccepted: a.IsAccepted,
-			Link:       a.Link,
-			QuestionID: a.QuestionID,
-			Score:      a.Score,
-			Title:      a.Title,
-		})
+		doc, err := json2bson(a)
 		if err != nil {
+			log.Printf("answer (id=%d) ->BSON failed: %v", a.ID, err)
+		} else if _, err := Mongo.C(AnswerCollection).UpsertId(a.ID, doc); err != nil {
 			log.Printf("answer (id=%d) upsert failed: %v", a.ID, err)
 		}
 	}
@@ -164,6 +156,7 @@ func fetchQuestions(n int, tag string) ([]stackexchange.Question, error) {
 		Site:     Site,
 		Tagged:   tag,
 		PageSize: n,
+		Filter:   AllQuestionsFilter,
 	})
 	return questions, err
 }
@@ -171,8 +164,19 @@ func fetchQuestions(n int, tag string) ([]stackexchange.Question, error) {
 func fetchQuestionAnswers(ids []int) ([]stackexchange.Answer, error) {
 	var answers []stackexchange.Answer
 	_, err := Client.Do(stackexchange.PathQuestionAnswers, &answers, &stackexchange.Params{
-		Site: Site,
-		Args: []string{stackexchange.JoinIDs(ids)},
+		Site:   Site,
+		Args:   []string{stackexchange.JoinIDs(ids)},
+		Filter: QuestionAnswersFilter,
 	})
 	return answers, err
+}
+
+func json2bson(v interface{}) (bson.M, error) {
+	var doc map[string]interface{}
+	data, err := json.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(data, &doc)
+	return bson.M(doc), err
 }
