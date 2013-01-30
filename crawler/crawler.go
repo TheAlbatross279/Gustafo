@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net/http"
 	"net/url"
 	"os"
 
@@ -13,7 +12,8 @@ import (
 
 // OAuth constants
 const (
-	clientID       = "1144"
+	appClientID    = "1144"
+	appKey         = "VbR*HN60lyuKdIHm3M)3)Q(("
 	oauthDialogURL = "https://stackexchange.com/oauth/dialog"
 	redirectURL    = "https://stackexchange.com/oauth/login_success"
 )
@@ -25,18 +25,6 @@ var (
 	Client StackExchangeClient
 )
 
-type oauthRoundTripper struct {
-	http.RoundTripper
-	Token string
-}
-
-func (oa *oauthRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
-	log.Println("Bearer", oa.Token)
-	//req.Header.Set("Authorization", "Bearer "+oa.Token)
-	return oa.RoundTripper.RoundTrip(req)
-
-}
-
 func main() {
 	flag.StringVar(&Site, "site", Site, "the site name to scrape from")
 	flag.StringVar(&OAuthToken, "oauth", OAuthToken, "OAuth 2.0 token")
@@ -46,7 +34,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, "No OAuth 2.0 token given. Please visit:")
 		fmt.Fprintln(os.Stderr)
 		fmt.Fprintln(os.Stderr, "  "+oauthDialogURL+"?"+url.Values{
-			"client_id":    {clientID},
+			"client_id":    {appClientID},
 			"scope":        {"no_expiry"},
 			"redirect_uri": {redirectURL},
 		}.Encode())
@@ -56,12 +44,10 @@ func main() {
 	}
 
 	{
-		rlc := NewRateLimitClient(&stackexchange.Client{Client: &http.Client{
-			Transport: &oauthRoundTripper{
-				RoundTripper: http.DefaultTransport,
-				Token:        OAuthToken,
-			},
-		}})
+		rlc := NewRateLimitClient(&stackexchange.Client{
+			AccessToken: OAuthToken,
+			Key:         appKey,
+		})
 		defer rlc.Close()
 		Client = rlc
 	}
