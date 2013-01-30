@@ -68,16 +68,27 @@ func (rlc *RateLimitClient) run() {
 }
 
 func (rlc *RateLimitClient) handle(req *apiRequest) {
+	// Ensure sequential access to this path
 	lock := rlc.locker.Get(req.path)
 	lock.Lock()
 	defer lock.Unlock()
-	log.Println("API:", req.path)
+
+	// Send request
 	wrapper, err := rlc.client.Do(req.path, req.v, req.params)
-	log.Printf("%+v", wrapper)
+
+	// Log API call
+	if werr := &wrapper.Error; werr.ID != 0 {
+		log.Printf("API %v (quota=%d/%d backoff=%d) error: %v", req.path, wrapper.QuotaRemaining, wrapper.QuotaMax, wrapper.Backoff, werr)
+	} else {
+		log.Printf("API %v (quota=%d/%d backoff=%d) OK", req.path, wrapper.QuotaRemaining, wrapper.QuotaMax, wrapper.Backoff)
+	}
+
+	// Send back response
 	req.c <- &apiResponse{wrap: wrapper, err: err}
+
+	// Wait for backoff before releasing lock
 	if wrapper.Backoff > 0 {
 		dur := time.Duration(wrapper.Backoff) * time.Second
-		log.Printf("  backoff: %s (t=%v)", req.path, dur)
 		time.Sleep(dur)
 	}
 }
