@@ -6,12 +6,13 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"time"
 
 	"bitbucket.org/zombiezen/stackexchange"
 	"labix.org/v2/mgo"
 )
 
-// OAuth constants
+// OAuth parameters
 const (
 	appClientID    = "1144"
 	appKey         = "VbR*HN60lyuKdIHm3M)3)Q(("
@@ -19,11 +20,21 @@ const (
 	redirectURL    = "https://stackexchange.com/oauth/login_success"
 )
 
+// Collection names
+const (
+	QuestionCollection = "questions"
+	AnswerCollection   = "answers"
+)
+
+// Flags
 var (
 	Site       = stackexchange.StackOverflow
 	OAuthToken = ""
 	Tag        = ""
+)
 
+// Connections
+var (
 	Client StackExchangeClient
 	Mongo  *mgo.Database
 )
@@ -76,17 +87,50 @@ func fetchBatch() error {
 	if err != nil {
 		return err
 	}
-	// TODO: add questions to database
+	for i := range questions {
+		q := &questions[i]
+		_, err := Mongo.C(QuestionCollection).UpsertId(q.ID, Question{
+			ID:               q.ID,
+			AcceptedAnswerID: q.AcceptedAnswerID,
+			AnswerCount:      q.AnswerCount,
+			ClosedDate:       time.Time(q.ClosedDate),
+			ClosedReason:     q.ClosedReason,
+			Created:          time.Time(q.Created),
+			IsAnswered:       q.IsAnswered,
+			Link:             q.Link,
+			Score:            q.Score,
+			Title:            q.Title,
+		})
+		if err != nil {
+			log.Printf("question (id=%d) upsert failed: %v", q.ID, err)
+		}
+	}
 
 	questionIDs := make([]int, len(questions))
 	for i := range questions {
 		questionIDs[i] = questions[i].ID
 	}
 	answers, err := fetchQuestionAnswers(questionIDs)
+	log.Println(len(answers), "answers")
 	if err != nil {
 		return err
 	}
-	// TODO: add answers to database
+	for i := range answers {
+		a := &answers[i]
+		_, err := Mongo.C(AnswerCollection).UpsertId(a.ID, Answer{
+			ID:         a.ID,
+			Body:       a.Body,
+			Created:    time.Time(a.Created),
+			IsAccepted: a.IsAccepted,
+			Link:       a.Link,
+			QuestionID: a.QuestionID,
+			Score:      a.Score,
+			Title:      a.Title,
+		})
+		if err != nil {
+			log.Printf("answer (id=%d) upsert failed: %v", a.ID, err)
+		}
+	}
 
 	_, _ = questions, answers
 	return nil
