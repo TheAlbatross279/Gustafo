@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -114,35 +113,38 @@ func main() {
 }
 
 func fetchBatch() error {
+	const (
+		questionIDKey = "question_id"
+		answerIDKey   = "answer_id"
+	)
+
 	questions, err := fetchQuestions(50, Tag)
 	if err != nil {
 		return err
 	}
-	for i := range questions {
-		q := &questions[i]
-		doc, err := json2bson(q)
-		if err != nil {
-			log.Printf("question (id=%d) ->BSON failed: %v", q.ID, err)
-		} else if _, err := Mongo.C(QuestionCollection).UpsertId(q.ID, doc); err != nil {
-			log.Printf("question (id=%d) upsert failed: %v", q.ID, err)
+	questionIDs := make([]int, 0, len(questions))
+	for _, q := range questions {
+		if id, ok := getID(q, questionIDKey); ok {
+			questionIDs = append(questionIDs, id)
+			if _, err := Mongo.C(QuestionCollection).UpsertId(id, q); err != nil {
+				log.Printf("question (id=%d) upsert failed: %v", id, err)
+			}
+		} else {
+			log.Println("question has no ID")
 		}
 	}
 
-	questionIDs := make([]int, len(questions))
-	for i := range questions {
-		questionIDs[i] = questions[i].ID
-	}
 	answers, err := fetchQuestionAnswers(questionIDs)
 	if err != nil {
 		return err
 	}
-	for i := range answers {
-		a := &answers[i]
-		doc, err := json2bson(a)
-		if err != nil {
-			log.Printf("answer (id=%d) ->BSON failed: %v", a.ID, err)
-		} else if _, err := Mongo.C(AnswerCollection).UpsertId(a.ID, doc); err != nil {
-			log.Printf("answer (id=%d) upsert failed: %v", a.ID, err)
+	for _, a := range answers {
+		if id, ok := getID(a, answerIDKey); ok {
+			if _, err := Mongo.C(AnswerCollection).UpsertId(id, a); err != nil {
+				log.Printf("answer (id=%d) upsert failed: %v", id, err)
+			}
+		} else {
+			log.Println("answer has no ID")
 		}
 	}
 
@@ -150,8 +152,8 @@ func fetchBatch() error {
 	return nil
 }
 
-func fetchQuestions(n int, tag string) ([]stackexchange.Question, error) {
-	var questions []stackexchange.Question
+func fetchQuestions(n int, tag string) ([]bson.M, error) {
+	var questions []bson.M
 	_, err := Client.Do(stackexchange.PathAllQuestions, &questions, &stackexchange.Params{
 		Site:     Site,
 		Tagged:   tag,
@@ -161,8 +163,8 @@ func fetchQuestions(n int, tag string) ([]stackexchange.Question, error) {
 	return questions, err
 }
 
-func fetchQuestionAnswers(ids []int) ([]stackexchange.Answer, error) {
-	var answers []stackexchange.Answer
+func fetchQuestionAnswers(ids []int) ([]bson.M, error) {
+	var answers []bson.M
 	_, err := Client.Do(stackexchange.PathQuestionAnswers, &answers, &stackexchange.Params{
 		Site:   Site,
 		Args:   []string{stackexchange.JoinIDs(ids)},
@@ -171,12 +173,9 @@ func fetchQuestionAnswers(ids []int) ([]stackexchange.Answer, error) {
 	return answers, err
 }
 
-func json2bson(v interface{}) (bson.M, error) {
-	var doc map[string]interface{}
-	data, err := json.Marshal(v)
-	if err != nil {
-		return nil, err
+func getID(m bson.M, key string) (id int, ok bool) {
+	if fid, ok := m[key].(float64); ok {
+		return int(fid), true
 	}
-	err = json.Unmarshal(data, &doc)
-	return bson.M(doc), err
+	return 0, false
 }
