@@ -26,19 +26,21 @@ type RateLimitClient struct {
 	client StackExchangeClient
 	c      chan *apiRequest
 	locker keyLocker
+	timer  timer
 }
 
 func NewRateLimitClient(client StackExchangeClient) *RateLimitClient {
 	rlc := &RateLimitClient{
 		client: client,
 		c:      make(chan *apiRequest),
+		timer:  realTime{},
 	}
 	go rlc.run()
 	return rlc
 }
 
 func (rlc *RateLimitClient) run() {
-	day := time.NewTicker(dayDuration)
+	day := rlc.timer.NewTicker(dayDuration)
 	defer day.Stop()
 
 	quotaRemaining := apiPerDay
@@ -50,19 +52,19 @@ func (rlc *RateLimitClient) run() {
 				if !ok {
 					return
 				}
-				now := time.Now()
+				now := rlc.timer.Now()
 				if elapsed := now.Sub(lastRequest); elapsed < secondsPerApi {
-					time.Sleep(secondsPerApi - elapsed)
-					now = time.Now()
+					rlc.timer.Sleep(secondsPerApi - elapsed)
+					now = rlc.timer.Now()
 				}
 				lastRequest = now
 				go rlc.handle(req)
-			case <-day.C:
+			case <-day.Chan():
 				quotaRemaining += apiPerDay
 			}
 		}
 
-		<-day.C
+		<-day.Chan()
 		quotaRemaining += apiPerDay
 	}
 }
@@ -93,7 +95,7 @@ func (rlc *RateLimitClient) handle(req *apiRequest) {
 	// Wait for backoff before releasing lock
 	if wrapper != nil && wrapper.Backoff > 0 {
 		dur := time.Duration(wrapper.Backoff) * time.Second
-		time.Sleep(dur)
+		rlc.timer.Sleep(dur)
 	}
 }
 
