@@ -77,17 +77,21 @@ func (rlc *RateLimitClient) handle(req *apiRequest) {
 	wrapper, err := rlc.client.Do(req.path, req.v, req.params)
 
 	// Log API call
-	if werr := &wrapper.Error; werr.ID != 0 {
-		log.Printf("API %v (quota=%d/%d backoff=%d) error: %v", req.path, wrapper.QuotaRemaining, wrapper.QuotaMax, wrapper.Backoff, werr)
+	if wrapper != nil {
+		if werr := &wrapper.Error; werr.ID != 0 {
+			log.Printf("API %v (quota=%d/%d backoff=%d) error: %v", req.path, wrapper.QuotaRemaining, wrapper.QuotaMax, wrapper.Backoff, werr)
+		} else {
+			log.Printf("API %v (quota=%d/%d backoff=%d) OK", req.path, wrapper.QuotaRemaining, wrapper.QuotaMax, wrapper.Backoff)
+		}
 	} else {
-		log.Printf("API %v (quota=%d/%d backoff=%d) OK", req.path, wrapper.QuotaRemaining, wrapper.QuotaMax, wrapper.Backoff)
+		log.Printf("API %v FAIL: %v", req.path)
 	}
 
 	// Send back response
 	req.c <- &apiResponse{wrap: wrapper, err: err}
 
 	// Wait for backoff before releasing lock
-	if wrapper.Backoff > 0 {
+	if wrapper != nil && wrapper.Backoff > 0 {
 		dur := time.Duration(wrapper.Backoff) * time.Second
 		time.Sleep(dur)
 	}
