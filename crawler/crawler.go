@@ -125,6 +125,7 @@ func fetchBatch() error {
 	questionIDs := make([]int, 0, len(questions))
 	for _, q := range questions {
 		if id, ok := getID(q, questionIDKey); ok {
+			q["_id"] = id
 			questionIDs = append(questionIDs, id)
 			if _, err := Mongo.C(QuestionCollection).UpsertId(id, q); err != nil {
 				log.Printf("question (id=%d) upsert failed: %v", id, err)
@@ -140,6 +141,7 @@ func fetchBatch() error {
 	}
 	for _, a := range answers {
 		if id, ok := getID(a, answerIDKey); ok {
+			a["_id"] = id
 			if _, err := Mongo.C(AnswerCollection).UpsertId(id, a); err != nil {
 				log.Printf("answer (id=%d) upsert failed: %v", id, err)
 			}
