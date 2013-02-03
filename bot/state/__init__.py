@@ -5,9 +5,8 @@ Gustafo is s knowledge based system that uses a state machine to transiition fro
 import os
 import glob
 
-import os
 for module in os.listdir(os.path.dirname(__file__)):
-    if module == '__init__.py' or module.endswith('.py'):
-        continue
-    __import__(module[:-3], locals(), globals())
+   if module == '__init__.py' or not module.endswith('.py'):
+      continue
+   __import__(module[:-3], locals(), globals())
 del module

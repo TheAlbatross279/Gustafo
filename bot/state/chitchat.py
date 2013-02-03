@@ -1,7 +1,7 @@
 from state import State
-from 
+#from 
 
-class ChitChat():
+class ChitChat(State):
     def __init__(self):
         self.processor = MSGProcessor()
 
@@ -14,5 +14,5 @@ class ChitChat():
         response = processor(msg)
         return response
 
-State.register(ChitChat, True)
+#State.register(ChitChat, True)
         
