@@ -1,9 +1,8 @@
 from state import *
 
 class Bot(object):
-   def __init__(self, adapter, db):
+   def __init__(self, adapter):
       self.adapter = adapter
-      self.db = db
 
    def die(self):
       pass

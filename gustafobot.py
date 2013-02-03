@@ -16,8 +16,8 @@ class GustafoBot(Bot):
    CHAT = 0
    TIMEOUT = 30.0
 
-   def __init__(self, adapter, db=None):
-      Bot.__init__(self, adapter, db) 
+   def __init__(self, adapter):
+      Bot.__init__(self, adapter) 
 
       self.idle = {}
       self.resume_state = {}
