@@ -1,5 +1,5 @@
-"""
-This package contains the code to initalize the bot and connect it to the appropriate channel. It also initializes the states.
-"""
+'''
+This package contains the Bot class which is used to hold all parts of the system together.
+'''
 
 from bot import *

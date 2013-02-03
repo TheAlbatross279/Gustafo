@@ -5,17 +5,46 @@ def state_test((msg, state)):
    return (state.recognize(msg), state)
 
 class State:
+   '''
+   Represents a state of conversation which the user can be in. All user-defined states must
+   subclass this class.
+   '''
+
    users = []
+   '''
+   Current users present in the room.
+   '''
+
    states = []
+   '''
+   List of all known states
+   '''
+
    initial_states = []
+   '''
+   List of all states the user could possibly start in.
+   '''
+
    user_state = {}
+   '''
+   Keeps track of what state each user is currently in. This allows the bot to hold a
+   conversation with multiple users.
+   '''
 
    @staticmethod
    def forget():
+      '''
+      Forget all user states.
+      '''
       State.user_state = {}
-   
+
    @staticmethod
    def register(state, isInitial=False):
+      '''
+      Register a state. This makes a user-defined state known to the bot. It can also be specified
+      that this state should be considered an initial state. This method will also call the given
+      state's init() method.
+      '''
       State.states.append(state)
       if isInitial:
          State.initial_states.append(state)
@@ -32,6 +61,9 @@ class State:
 
    @staticmethod
    def force_state(state, context={}):
+      '''
+      Force a user into a specific state.
+      '''
       if context.get('_nick', None) is not None:
          State.user_state[context['_nick']] = state
 
@@ -39,6 +71,10 @@ class State:
 
    @staticmethod
    def query(nick, msg):
+      '''
+      Query the valid states. This method will take in a message from the user and return the
+      bot's response.
+      '''
       #print msg
 
       msg_tag = pos_tag(word_tokenize(msg))
@@ -72,15 +108,24 @@ class State:
 
    @staticmethod
    def init():
+      '''
+      Do any setup needed by the state. This will likely include creating a connection to a
+      database. This method is called when the state is registered.
+      '''
+      pass
+
+   
+   @staticmethod
+   def die():
+      '''
+      Called when the Bot is told to die. Allows states to do any necessary cleanup. This will
+      typically entail closing a database connection.
+      '''
       pass
 
    @staticmethod
-   def die():
-      pass
- 
-   @staticmethod
    def recognize(msg):
-      return (0, {})
+     return (0, {})
 
    @staticmethod
    def respond(context):
