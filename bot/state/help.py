@@ -10,7 +10,7 @@ class Help(State):
     
     @staticmethod
     def respond(context):
-        response = processor(msg)
+        response = self.processor(msg)
         return response
 
 #State.register(ChitChat, True)

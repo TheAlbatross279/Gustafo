@@ -12,6 +12,8 @@ class CLIAdapter(Adapter):
          try:
             line = raw_input("> ")
          except (EOFError, KeyboardInterrupt):
+            # print newline
+            print
             return
 
          if line == "quit":

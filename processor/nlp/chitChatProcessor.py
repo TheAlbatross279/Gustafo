@@ -3,8 +3,8 @@ Handles communication between DB and ChitChat State by processing
 messages and communicating with the db to find response.
 """
 
-from nlp import MSGProcessor
-from inference import CCInferenceEngine
+from processor.nlp.msgprocessor import MSGProcessor
+from processor.inference import CCInferenceEngine
 
 class ChitChatProcessor(MSGProcessor):
    def __init__(self, filter):
