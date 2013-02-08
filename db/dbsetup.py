@@ -1,3 +1,7 @@
+"""
+LEGACY GUSTAFO 1.0 -- NOT ADAPTED FOR USE IN Gustafo 2.0
+"""
+
 import sqlite3 
 
 class Database(object):

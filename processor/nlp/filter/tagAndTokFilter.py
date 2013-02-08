@@ -9,11 +9,11 @@ from nltk import pos_tag, word_tokenize
 class TagAndTokFilter(Filter):
    def filter(self, msg):
       #normailze
-      msgNormalized = self.normalize(msg)
+      msg_normalized = self.normalize(msg)
 
       #tag and tokenize
-      msgTagged = pos_tag(word_tokenize(msgNormalized))
-      return msgTagged
+      msg_tagged = pos_tag(word_tokenize(msg_normalized))
+      return msg_tagged
 
 def main():
    f = TagAndTokFilter()

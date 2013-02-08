@@ -11,6 +11,6 @@ class ChitChatProcessor(MSGProcessor):
       super.__init__(filter)
       self.CCIE = CCInferenceEngine()
       
-   def callInference(msg):
+   def call_inference(msg):
       return self.CCIE.infer(msg)
       
