@@ -7,22 +7,22 @@ import re
 
 class Filter(object):
    def filter(self, msg):
-      return self.fullParse(msg)
+      return self.full_parse(msg)
 
    def normalize(self, msg):
-       splitMsg = msg.lower()
-       splitMsg = re.sub("[^A-Za-z0-9 ]", "", splitMsg)
-       splitMsg = re.sub("[ ]+", " ", splitMsg)
-       return splitMsg
+       split_msg = msg.lower()
+       split_msg = re.sub("[^A-Za-z0-9 ]", "", split_msg)
+       split_msg = re.sub("[ ]+", " ", split_msg)
+       return split_msg
         
-   def splitParse(self, msg):
-       splitMsg = self.normalize(msg)
-       splitMsg = splitMsg.split(" ")
-       print splitMsg
+   def split_parse(self, msg):
+       split_msg = self.normalize(msg)
+       split_msg = split_msg.split(" ")
+       print split_msg
 
-       return splitMsg
+       return split_msg
 
-   def fullParse(self, msg):
+   def full_parse(self, msg):
        return self.normalize(msg)
 
    def main():

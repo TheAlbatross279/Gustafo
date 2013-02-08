@@ -14,12 +14,11 @@ class MSGProcessor(object):
     def respond(self, msg):
         filtMsg =  filter.filter(msg)
 
-        #TODO (Kim) look up response in db
         #choose valid response
-        response = callInference(filtMsg)
+        response = call_inference(filtMsg)
         return response
 
     '''to be subclassed'''
-    def callInference(msg):
+    def call_inference(msg):
         pass
 
