@@ -43,7 +43,6 @@ class _Resource(resource.Resource):
 
    def render_POST(self, request):
       line = request.args["m"][0]
-      print line
       self._adapter.bot.on_message("user", line)
       return """<!DOCTYPE html>
 <html>
@@ -95,7 +94,7 @@ class WebAdapter(Adapter):
       reactor.listenTCP(self.port, site)
       reactor.run()
 
-   def send_message(self, nick, msg):
+   def send_message(self, msg):
       print msg
 
    def get_users(self):
