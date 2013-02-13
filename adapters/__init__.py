@@ -7,4 +7,5 @@ __all__ = [
    'adapter',
    'cliadapter',
    'ircadapter',
+   'webadapter',
 ]
