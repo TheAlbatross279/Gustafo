@@ -23,14 +23,10 @@ class HelpConnection(Connection):
          self.connection.commit()
       else:
          rtn = self.cursor.fetchmany(100);
-      
-      for val in rtn:
-         print val
 
-      return [result for result in rtn]
-      '''
-      return [result for result in self.cursor]
-      '''
+      return rtn
+
+
    def close(self):
       '''
       Do any cleanup necessary and close the connection. The Bot can call this method at any time.
