@@ -9,6 +9,14 @@ from adapter import *
 
 __all__ = ['WebAdapter']
 
+# TODO(ross): Refactor event codes into bot/bot.py interface.
+#             Currently, GustafoBot is tightly coupled to IRCAdapter.
+JOIN = 0x1
+DIE = 0x2
+USER_JOIN = 0x3
+USER_EXIT = 0x4
+# END
+
 class _Resource(resource.Resource):
    def __init__(self, adapter):
       resource.Resource.__init__(self)
@@ -65,12 +73,19 @@ class _StaticResource(resource.Resource):
       return self._data
 
 class WebAdapter(Adapter):
+   # TODO(ross): Again, GustafoBot requires this undocumented field
+   nickname = 'gustafo'
+
    def __init__(self, port=8080):
       super(WebAdapter, self).__init__()
       self.port = port
 
    def start(self, bot):
       super(WebAdapter, self).start(bot)
+
+      self.bot.on_event(JOIN)
+      # TODO(ross): We should be taking in user info
+      #self.bot.on_event(USER_JOIN, {'nick': 'user'})
 
       root = resource.Resource()
       root.putChild("", _Resource(self))
@@ -82,5 +97,8 @@ class WebAdapter(Adapter):
 
    def send_message(self, nick, msg):
       print msg
+
+   def get_users(self):
+      return ['user', 'gustafo']
 
 # vim: ft=python et ts=8 sts=3 sw=3 tw=100
