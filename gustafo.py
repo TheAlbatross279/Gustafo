@@ -2,7 +2,7 @@ import sys
 
 #import bot
 from gustafobot import GustafoBot
-from adapters import IRCAdapter
+from adapters.ircadapter import IRCAdapter
 
 def main():
    if len(sys.argv) != 4:

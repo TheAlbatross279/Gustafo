@@ -1,5 +1,5 @@
 from bot import *
-from adapters import CLIAdapter
+from adapters.cliadapter import CLIAdapter
 from db import SQLiteConn
 
 beemo = Bot(CLIAdapter())

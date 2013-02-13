@@ -1,6 +1,5 @@
 from bot import Bot
 from adapters.ircadapter import *
-from adapters import IRCAdapter
 from bot.state.state import State
 from bot.state.outreach import InitialOutreach
 from bot.state.solicitresponse import SolicitResponse
