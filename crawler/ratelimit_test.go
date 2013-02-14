@@ -2,13 +2,14 @@ package main
 
 import (
 	"bitbucket.org/zombiezen/stackexchange"
+	"sync"
 	"testing"
 	"time"
 )
 
-func TestRateLimitClient(t *testing.T) {
+func TestRateLimitClientBasic(t *testing.T) {
 	base := time.Date(2009, 11, 10, 23, 0, 0, 0, time.UTC)
-	timer := &mockTimer{base}
+	timer := &mockTimer{t: base}
 	mtc := &mockTimeClient{timer: timer}
 
 	// init
@@ -48,13 +49,18 @@ func (mtc *mockTimeClient) Do(path string, v interface{}, params *stackexchange.
 
 type mockTimer struct {
 	t time.Time
+	sync.RWMutex
 }
 
 func (mt *mockTimer) Now() time.Time {
+	mt.RLock()
+	defer mt.RUnlock()
 	return mt.t
 }
 
 func (mt *mockTimer) Sleep(d time.Duration) {
+	mt.Lock()
+	defer mt.Unlock()
 	mt.t = mt.t.Add(d)
 }
 
