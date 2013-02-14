@@ -66,7 +66,7 @@ func TestRateLimitClientAddDaily(t *testing.T) {
 		t.Errorf("quota remaining = %d; want %d", qr, expect)
 	}
 	ticker <- base.Add(24 * time.Hour)
-	if qr, expect := <-rlc.qr, 19999; qr != expect {
+	if qr, expect := <-rlc.qr, 10000; qr != expect {
 		t.Errorf("quota remaining = %d; want %d", qr, expect)
 	}
 }
