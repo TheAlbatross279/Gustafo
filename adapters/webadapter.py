@@ -88,6 +88,7 @@ class WebAdapter(Adapter):
 
       root = resource.Resource()
       root.putChild("", _Resource(self))
+      root.putChild('jquery-1.9.1.js', _StaticResource('jquery-1.9.1.js', 'text/javascript'))
       site = server.Site(root)
 
       from twisted.internet import reactor
