@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
+import json
 import pkgutil
 
 from twisted.application import internet, service
-from twisted.web import server, resource
+from twisted.web import server, resource, error
 
 from adapter import *
 
@@ -18,9 +19,10 @@ USER_EXIT = 0x4
 # END
 
 class _Resource(resource.Resource):
-   def __init__(self, adapter):
+   def __init__(self, adapter, log):
       resource.Resource.__init__(self)
       self._adapter = adapter
+      self._log = log
 
    def render_GET(self, request):
       request.setHeader('Content-Type', 'text/html; charset=utf-8')
@@ -45,22 +47,37 @@ class _Resource(resource.Resource):
       line = request.args["m"][0]
       # TODO(ross): stubbing
       # self._adapter.bot.on_message("user", line)
-      return """<!DOCTYPE html>
-<html>
-<head>
-   <title>Gustafo</title>
-</head>
-<body>
-   <div id="chatRecord">&nbsp;</div>
-   <div id="inputLine">
-      <form action="/" method="POST">
-         &gt; <input type="text" name="m">
-         <input type="submit" value="Send">
-      </form>
-   </div>
-</body>
-</html>
-"""
+      self._log.add_message(line)
+      request.setResponseCode(204)
+      return ""
+
+class _LogResource(resource.Resource):
+   def __init__(self):
+      resource.Resource.__init__(self)
+      self._boxes = {}
+
+   def add_message(self, msg):
+      """Add a message to everyone's box."""
+      for box in self._boxes.itervalues():
+         box.append(msg)
+
+   def new_box(self, user):
+      """Create a message box for a new user."""
+      self._boxes.setdefault(user, [])
+
+   def fetch_messages(self, user):
+      """Get and clear the message box for a user."""
+      box = self._boxes.setdefault(user, [])
+      boxCopy = list(box)
+      del box[:]
+      return boxCopy
+
+   def render_GET(self, request):
+      user_arg = request.args.get("user", [])
+      if not user_arg:
+         return error.NoResource()
+      request.setHeader('Content-Type', 'application/json; charset=utf-8')
+      return json.dumps(self.fetch_messages(user_arg[0]))
 
 class _StaticResource(resource.Resource):
    def __init__(self, name, mime_type):
@@ -83,13 +100,17 @@ class WebAdapter(Adapter):
    def start(self, bot):
       super(WebAdapter, self).start(bot)
 
+      self.logResource = _LogResource()
+
       # TODO(ross): stubbing
       #self.bot.on_event(JOIN)
       # TODO(ross): We should be taking in user info
       #self.bot.on_event(USER_JOIN, {'nick': 'user'})
+      self.logResource.new_box('user')
 
       root = resource.Resource()
-      root.putChild("", _Resource(self))
+      root.putChild("", _Resource(self, self.logResource))
+      root.putChild("log", self.logResource)
       root.putChild('jquery-1.9.1.js', _StaticResource('jquery-1.9.1.js', 'text/javascript'))
       site = server.Site(root)
 
@@ -99,6 +120,7 @@ class WebAdapter(Adapter):
 
    def send_message(self, msg):
       print msg
+      self.logResource.add_message(msg)
 
    def get_users(self):
       return ['user', 'gustafo']
