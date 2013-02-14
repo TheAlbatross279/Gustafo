@@ -86,7 +86,7 @@ func (rlc *RateLimitClient) handle(req *apiRequest) {
 			log.Printf("API %v (quota=%d/%d backoff=%d) OK", req.path, wrapper.QuotaRemaining, wrapper.QuotaMax, wrapper.Backoff)
 		}
 	} else {
-		log.Printf("API %v FAIL: %v", req.path)
+		log.Printf("API %v FAIL: %v", req.path, err)
 	}
 
 	// Send back response
