@@ -39,6 +39,8 @@ class _Resource(resource.Resource):
          <input type="submit" value="Send">
       </form>
    </div>
+   <script type="text/javascript" src="/jquery-1.9.1.js"></script>
+   <script type="text/javascript" src="/chat.js"></script>
 </body>
 </html>
 """
@@ -111,7 +113,10 @@ class WebAdapter(Adapter):
       root = resource.Resource()
       root.putChild("", _Resource(self, self.logResource))
       root.putChild("log", self.logResource)
-      root.putChild('jquery-1.9.1.js', _StaticResource('jquery-1.9.1.js', 'text/javascript'))
+      for name in ['jquery-1.9.1.js', 'chat.js']:
+         root.putChild(name, _StaticResource(name, 'text/javascript'))
+      for name in ['style.css']:
+         root.putChild(name, _StaticResource(name, 'text/css'))
       site = server.Site(root)
 
       from twisted.internet import reactor
