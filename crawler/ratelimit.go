@@ -27,6 +27,7 @@ type RateLimitClient struct {
 	c      chan *apiRequest
 	locker keyLocker
 	timer  timer
+	qr     chan int
 }
 
 func NewRateLimitClient(client StackExchangeClient) *RateLimitClient {
@@ -58,7 +59,10 @@ func (rlc *RateLimitClient) run() {
 					now = rlc.timer.Now()
 				}
 				lastRequest = now
+				quotaRemaining--
 				go rlc.handle(req)
+			case rlc.qr <- quotaRemaining:
+				// send quota remaining (if under test)
 			case <-day.Chan():
 				quotaRemaining += apiPerDay
 			}
