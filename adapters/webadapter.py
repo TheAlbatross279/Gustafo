@@ -43,7 +43,8 @@ class _Resource(resource.Resource):
 
    def render_POST(self, request):
       line = request.args["m"][0]
-      self._adapter.bot.on_message("user", line)
+      # TODO(ross): stubbing
+      # self._adapter.bot.on_message("user", line)
       return """<!DOCTYPE html>
 <html>
 <head>
@@ -82,7 +83,8 @@ class WebAdapter(Adapter):
    def start(self, bot):
       super(WebAdapter, self).start(bot)
 
-      self.bot.on_event(JOIN)
+      # TODO(ross): stubbing
+      #self.bot.on_event(JOIN)
       # TODO(ross): We should be taking in user info
       #self.bot.on_event(USER_JOIN, {'nick': 'user'})
 
