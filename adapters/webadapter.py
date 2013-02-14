@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
+from cgi import escape as htmlescape
 import json
 import pkgutil
+import random
 
 from twisted.application import internet, service
 from twisted.web import server, resource, error
@@ -25,6 +27,8 @@ class _Resource(resource.Resource):
       self._log = log
 
    def render_GET(self, request):
+      new_username = 'user' + str(random.randint(10000, 99999))
+      self._log.new_box(new_username)
       request.setHeader('Content-Type', 'text/html; charset=utf-8')
       return """<!DOCTYPE html>
 <html>
@@ -35,7 +39,8 @@ class _Resource(resource.Resource):
    <div id="chatRecord">&nbsp;</div>
    <div id="inputLine">
       <form action="/" method="POST">
-         &gt; <input type="text" name="m">
+         &gt; <input type="text" name="user" value="%s" size="10">:
+         <input type="text" name="m" size="30">
          <input type="submit" value="Send">
       </form>
    </div>
@@ -43,13 +48,14 @@ class _Resource(resource.Resource):
    <script type="text/javascript" src="/chat.js"></script>
 </body>
 </html>
-"""
+""" % (htmlescape(new_username))
 
    def render_POST(self, request):
+      user = request.args["user"][0]
       line = request.args["m"][0]
       # TODO(ross): stubbing
-      # self._adapter.bot.on_message("user", line)
-      self._log.add_message(line)
+      # self._adapter.bot.on_message(user, line)
+      self._log.add_message(user + ': ' + line)
       request.setResponseCode(204)
       return ""
 
@@ -108,7 +114,6 @@ class WebAdapter(Adapter):
       #self.bot.on_event(JOIN)
       # TODO(ross): We should be taking in user info
       #self.bot.on_event(USER_JOIN, {'nick': 'user'})
-      self.logResource.new_box('user')
 
       root = resource.Resource()
       root.putChild("", _Resource(self, self.logResource))
