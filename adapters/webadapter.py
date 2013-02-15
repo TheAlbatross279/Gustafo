@@ -34,15 +34,19 @@ class _Resource(resource.Resource):
 <html>
 <head>
    <title>Gustafo</title>
+   <link rel="stylesheet" type="text/css" href="/style.css">
 </head>
 <body>
-   <div id="chatRecord">&nbsp;</div>
-   <div id="inputLine">
-      <form action="/" method="POST">
-         &gt; <input type="text" name="user" value="%s" size="10">:
-         <input type="text" name="m" size="30">
-         <input type="submit" value="Send">
-      </form>
+   <div id="column">
+      <h1>Gustafo</h1>
+      <div id="chatRecord">&nbsp;</div>
+      <div id="inputLine">
+         <form action="/" method="POST">
+            &gt; <input type="text" name="user" value="%s" size="10">:
+            <input type="text" name="m" size="30">
+            <input type="submit" value="Send">
+         </form>
+      </div>
    </div>
    <script type="text/javascript" src="/jquery-1.9.1.js"></script>
    <script type="text/javascript" src="/chat.js"></script>

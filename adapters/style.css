@@ -1,0 +1,31 @@
+@import url(http://fonts.googleapis.com/css?family=Jacques+Francois+Shadow|Oswald:400,700);
+
+html, body {
+    background: #222;
+}
+
+#column {
+    width: 35em;
+    margin: 0 auto;
+    padding: 1ex 1em;
+    background: #eee;
+
+    font-family: "Oswald", "Helvetica", sans-serif;
+
+    -webkit-border-radius: 12px;
+            border-radius: 12px;
+    -webkit-background-clip: padding-box; background-clip: padding-box;
+}
+
+#column > h1 {
+    margin: 0;
+    padding: 0;
+    font-family: "Jacques Francois Shadow", sans-serif;
+}
+
+#chatRecord {
+    height: 15em;
+    overflow-y: auto;
+}
+
+
