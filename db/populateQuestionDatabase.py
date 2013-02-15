@@ -2,10 +2,24 @@ import pymongo
 from pymongo import MongoClient
 import psycopg2
 import datetime
+from HTMLParser import HTMLParser
+
+class MLStripper(HTMLParser):
+   def __init__(self):
+      self.reset()
+      self.fed = []
+   def handle_data(self, d):
+      self.fed.append(d)
+   def get_data(self):
+      return ''.join(self.fed)
+
+def strip_tags(htmlText):
+   s = MLStripper()
+   s.feed(htmlText)
+   return s.get_data()
 
 def formatString(text):
-   #TODO This Method
-   return text
+   return strip_tags(text)
 
 def formatDate(dateNum):
    return datetime.datetime.fromtimestamp(dateNum)
@@ -29,6 +43,17 @@ for i in range(qNum):
 
    curQ = allQuestions.next()
 
+   #Retrieve the question id
+   qid = curQ['question_id']
+
+   #See if this question is already in the postgres db
+   pgCur.execute("SELECT * FROM question WHERE qid = %s", [qid])
+   result = pgCur.fetchone()
+
+   #If the question already exists in the DB, continue
+   if(result != None):
+      continue
+
    #Get the user and put the user in the database
    curU = curQ['owner']
    uname = curU['display_name']
@@ -43,7 +68,6 @@ for i in range(qNum):
       pgCur.execute("INSERT INTO so_user (so_user, reputation) VALUES (%s, %s)", (uname, uRep))
 
    #Pull all attributes off the question
-   qid = curQ['question_id']
    title = formatString(curQ['title'])
    creator = curQ['owner']['display_name']
    editor = curQ['owner']['display_name']
@@ -73,7 +97,7 @@ for i in range(qNum):
       #Pull all of the attributes off the answer
       aid = curA['answer_id'] 
       user = curA['owner']['display_name']
-      body = curA['body']
+      body = formatString(curA['body'])
       rating = curA['up_vote_count']
       time = formatDate(curA['creation_date'])
 
