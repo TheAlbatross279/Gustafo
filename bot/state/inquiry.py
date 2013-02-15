@@ -1,5 +1,4 @@
 from state import State
-from solicituser import SolicitUser
 import random
 
 class InquiryState(State):
@@ -27,28 +26,16 @@ class InquiryState(State):
    def respond(context):
       if context['type'] == 'well_being':
          InquiryState.responce_type = 1
-         State.force_state(SolicitUser,{'_nick': context['_nick']})
-         solicitations = ["Do you want to hear some gossip?",
-                          "Would you like me to tell you some gossip?",
-                          "I know something really interesting. Would you like to hear about it?",
-                          "I have some gossip, would you like me to share it with you?"]
-         rand_ndx = random.randint(0, len(solicitations) - 1)
 
-
-         responses = ["I\'m doing awful. Thanks for asking. But maybe you could help. ",
-                      "I am doing great, I keep hearing all these interesting rumors. ",
-                      "Not bad, Could be better "]
+         responses = ["I\'m doing awful. Thanks for asking.",
+                      "I am doing great!",
+                      "Not bad, Could be better."]
 
          rand_ndy = random.randint(0, len(responses) - 1)
 
-         return responses[rand_ndy] + solicitations[rand_ndx]
+         return responses[rand_ndy]
       else:
          InquiryState.responce_type = 0
          return 'Not much, what\'s up with you?'
-
-   @staticmethod
-   def next_states():
-   #if InquiryState.responce_type:
-      return tuple([SolicitUser])
 
 State.register(InquiryState)
