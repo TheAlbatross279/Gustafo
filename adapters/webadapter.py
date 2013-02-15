@@ -54,7 +54,7 @@ class _Resource(resource.Resource):
       user = request.args["user"][0]
       line = request.args["m"][0]
       # TODO(ross): stubbing
-      # self._adapter.bot.on_message(user, line)
+      self._adapter.bot.on_message(user, line)
       self._log.add_message(user + ': ' + line)
       request.setResponseCode(204)
       return ""
@@ -128,7 +128,7 @@ class WebAdapter(Adapter):
       reactor.listenTCP(self.port, site)
       reactor.run()
 
-   def send_message(self, msg):
+   def send_message(self, nick, msg):
       print msg
       self.logResource.add_message(msg)
 
