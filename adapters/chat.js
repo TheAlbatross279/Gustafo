@@ -11,6 +11,9 @@
             for (var i = 0; i < data.length; i++) {
                 chatRecord.append($('<div class="message">').text(data[i]));
             }
+            if (data.length > 0) {
+                chatRecord.scrollTop(chatRecord[0].scrollHeight);
+            }
         });
     }
 

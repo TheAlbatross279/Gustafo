@@ -24,8 +24,13 @@ html, body {
 }
 
 #chatRecord {
+    margin: 0;
+    padding: 0;
     height: 15em;
     overflow-y: auto;
 }
 
-
+#chatRecord > div {
+    margin: 0;
+    padding: 0;
+}

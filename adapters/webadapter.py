@@ -39,7 +39,7 @@ class _Resource(resource.Resource):
 <body>
    <div id="column">
       <h1>Gustafo</h1>
-      <div id="chatRecord">&nbsp;</div>
+      <div id="chatRecord"></div>
       <div id="inputLine">
          <form action="/" method="POST">
             &gt; <input type="text" name="user" value="%s" size="10">:
