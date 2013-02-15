@@ -27,6 +27,7 @@ type RateLimitClient struct {
 	c      chan *apiRequest
 	locker keyLocker
 	timer  timer
+	qr     chan int // quota remaining channel (for testing)
 }
 
 func NewRateLimitClient(client StackExchangeClient) *RateLimitClient {
@@ -58,14 +59,17 @@ func (rlc *RateLimitClient) run() {
 					now = rlc.timer.Now()
 				}
 				lastRequest = now
+				quotaRemaining--
 				go rlc.handle(req)
+			case rlc.qr <- quotaRemaining:
+				// send quota remaining (if under test)
 			case <-day.Chan():
-				quotaRemaining += apiPerDay
+				quotaRemaining = apiPerDay
 			}
 		}
 
 		<-day.Chan()
-		quotaRemaining += apiPerDay
+		quotaRemaining = apiPerDay
 	}
 }
 
@@ -86,7 +90,7 @@ func (rlc *RateLimitClient) handle(req *apiRequest) {
 			log.Printf("API %v (quota=%d/%d backoff=%d) OK", req.path, wrapper.QuotaRemaining, wrapper.QuotaMax, wrapper.Backoff)
 		}
 	} else {
-		log.Printf("API %v FAIL: %v", req.path)
+		log.Printf("API %v FAIL: %v", req.path, err)
 	}
 
 	// Send back response
