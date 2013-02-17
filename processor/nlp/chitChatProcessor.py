@@ -4,13 +4,13 @@ messages and communicating with the db to find response.
 """
 
 from processor.nlp.msgprocessor import MSGProcessor
-from processor.inference import CCInferenceEngine
+from processor.inference.ccInferenceEngine import CCInferenceEngine
 
 class ChitChatProcessor(MSGProcessor):
    def __init__(self, filter):
-      super.__init__(filter)
+      super(ChitChatProcessor, self).__init__(filter)
       self.CCIE = CCInferenceEngine()
       
-   def call_inference(msg):
+   def call_inference(self, msg):
       return self.CCIE.infer(msg)
       

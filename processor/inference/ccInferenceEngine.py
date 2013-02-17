@@ -61,13 +61,13 @@ class CCInferenceEngine():
          self.user_use_stats[tup[0]] = tup[1]
          self.gust_use_stats[tup[0]] = tup[2]
 
+#      print self.user_use_stats, self.gust_use_stats
 
    def infer(self, msg):
       """Infers a resonse given a message.
 
       Takes list of strings as input, returns a string
       """
-
       msg_id = self.find_id(msg)
       response = ""
       
@@ -77,7 +77,6 @@ class CCInferenceEngine():
       #if exists, find response
       else:
           response = self.lookup_response(msg, msg_id)
-
       return response
 
 
@@ -145,24 +144,34 @@ class CCInferenceEngine():
    #generates a response based on msg
    def gen_response(self, msg):
       """generates a new response"""
-      pass
+      #TODO fix this logic
+      return "I'm not sure what's going on!"
 
    #updates the tables with stats 
    def update_db_stats(self, msg_id, user=False):
       """Updates the usage stats for a message in the db"""
+      update_query = "UPDATE DATA_PHRASE_STATS SET"
       if user == True:
          self.user_use_stats[msg_id] = int(self.user_use_stats[msg_id]) + 1
+         update_query = update_query + " user_use = %s WHERE id = %s;" % (self.user_use_stats[msg_id], msg_id)
       else: 
          self.gust_use_stats[msg_id] = int(self.gust_use_stats[msg_id]) + 1
+         update_query = update_query + " gust_use = %s WHERE id = %s;" % (self.gust_use_stats[msg_id], msg_id)
 
-      #push to db?
+      #push to db
+      self.db_conn.query(update_query)
+      
 
-
-   def add_msg(self, msg):
-      """Adds a new message to the db"""
+   def add_msg(self, filtered_msg, unfiltered_msg, utterance_id):
+      """Adds a new message to the db and pairs it with the utterance_id"""
       #filter msg
       insert_statement = 'INSERT INTO DATA_PHRASES (orig_utterance, sani_utterance) VALUES'
-      #insert
+      #insert into DATA_Phrases
+
+      #insert into DATA_Convo_pairs
+
+
+      #insert into DATA_stats
       
 
 

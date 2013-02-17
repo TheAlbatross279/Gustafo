@@ -19,4 +19,4 @@ class ILoveYouState(State):
    def respond(context):
       return "I love you too, " + context['_nick'] + "!"
 
-State.register(ILoveYouState, True)
+#State.register(ILoveYouState, True)

@@ -29,4 +29,4 @@ class SecondaryOutreach(State):
 
       return inquiries[rand_ndx]
 
-State.register(SecondaryOutreach)
+#State.register(SecondaryOutreach)

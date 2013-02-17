@@ -12,4 +12,4 @@ class GiveUpState(State):
         
       return frustrated_responses[rand_ndx]
 
-State.register(GiveUpState)
+#State.register(GiveUpState)

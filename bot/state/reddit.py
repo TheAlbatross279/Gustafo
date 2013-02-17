@@ -19,4 +19,4 @@ class RedditState(State):
    def respond(context):
       return "Midnight."
 
-State.register(RedditState, True)
+#State.register(RedditState, True)

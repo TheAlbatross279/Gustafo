@@ -3,7 +3,7 @@ Pipelined processor that takes in a Filter, processes a message, and communicate
 inference engine to retrieve correct response to user input.
 """
 
-from processor.nlp.filter import filter
+from processor.nlp.filter.filter import Filter
 
 class MSGProcessor(object):
     def __init__(self, filter):
@@ -11,13 +11,13 @@ class MSGProcessor(object):
 
     '''check the possible responses and choose one'''
     def respond(self, msg):
-        filtMsg =  filter.Filter(msg)
+        filtMsg =  self.filter.filter(msg)
 
         #choose valid response
-        response = call_inference(filtMsg)
+        response = self.call_inference(filtMsg)
         return response
 
     '''to be subclassed'''
-    def call_inference(msg):
+    def call_inference(self, msg):
         pass
 

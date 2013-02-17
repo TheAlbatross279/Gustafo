@@ -38,4 +38,4 @@ class InquiryState(State):
          InquiryState.responce_type = 0
          return 'Not much, what\'s up with you?'
 
-State.register(InquiryState)
+#State.register(InquiryState)

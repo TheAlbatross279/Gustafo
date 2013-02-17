@@ -19,4 +19,4 @@ class SolicitResponse(State):
     def next_states():
         return tuple([GiveUpState])
 
-State.register(SolicitResponse)
+#State.register(SolicitResponse)
