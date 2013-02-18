@@ -5,9 +5,11 @@ Retrieves appropriate response to query given as input for the chit-chat state.
 from db import SQLiteConn
 from operator import itemgetter
 from math import ceil 
+import sqlite3
 
 class CCInferenceEngine():
    def __init__(self):
+      self.last_msg = None
       self.db_conn = SQLiteConn('db/ccie.db')
 
       #retrieve all data from DATA_PHRASES
@@ -15,10 +17,6 @@ class CCInferenceEngine():
       self.phrase_results = self.db_conn.query(find_id_query)
 #      print self.phrase_results
 
-#      self.phrase_results = [('1', 'how are you?', 'how are you'), 
-#                            ('2', 'fine.', 'fine'),
-#                            ('3', 'Good.', 'good'),
-#                            ('4', 'Okay...', 'okay')]
 
       #build dictionary from results
       self.phrases_by_phrase = dict()
@@ -36,7 +34,6 @@ class CCInferenceEngine():
       self.convo_pairs_results = self.db_conn.query(find_convos_query)
 #      print self.convo_pairs_results
  
-#      self.convo_pairs_results = [('1', '2'), ('1', '3'), ('1', '4')]
    
       #create dictionary for data_conovos
       self.convo_pairs = dict()
@@ -51,8 +48,6 @@ class CCInferenceEngine():
       self.stats_results = self.db_conn.query(find_stats_query)
 #      print self.stats_results
 
-#      self.stats_results = [('1', '2', '4'), ('2', '15', '3'), ('3', '5', '5'), ('4', '10', '4')]
-
       self.user_use_stats = dict()
       self.gust_use_stats = dict()
 
@@ -66,8 +61,9 @@ class CCInferenceEngine():
    def infer(self, msg):
       """Infers a resonse given a message.
 
-      Takes list of strings as input, returns a string
+      Takes list of strings as input, returns a string.
       """
+      print msg
       msg_id = self.find_id(msg)
       response = ""
       
@@ -77,6 +73,7 @@ class CCInferenceEngine():
       #if exists, find response
       else:
           response = self.lookup_response(msg, msg_id)
+          self.update_db_stats(msg_id, True)
       return response
 
 
@@ -87,7 +84,7 @@ class CCInferenceEngine():
       else: 
          return None
 
-   #finds response based on ID
+
    def lookup_response(self, msg, msg_id):
       """Looks up an appropirate response, given a known msg id"""
       if msg_id not in self.convo_pairs.keys():
@@ -116,8 +113,7 @@ class CCInferenceEngine():
          min_count = int(self.gust_use_stats[response_id])
          response_id = self.gust_use_stats[response_u_stat[0][0]]
 
-
-         #calculate rank of responses based on: count_user_use - count_gustafo_use = rank         
+         #calculate rank of responses based on: count_user_use - count_gustafo_use = rank
          ranked_results = [(res[0], int(res[1]) - 
                             int(self.gust_use_stats[res[0]])) for res in response_u_stat]
          #sort list by largest rank first
@@ -134,45 +130,82 @@ class CCInferenceEngine():
          #update db-stats
          self.update_db_stats(response_id)
          
+         #adds use case for the current message and the previous one
+         self.add_use_case(msg_id)
+         #update this msg as the last one he used
+         self.last_msg = msg_id
+
          return response
 
       #message exists in db but there are no responses to it -- this should never happen
       else: 
          print "No responses!"
 
-   
-   #generates a response based on msg
+
    def gen_response(self, msg):
       """generates a new response"""
+      print msg
       #TODO fix this logic
+      if self.last_msg != None:
+         self.add_msg(msg, msg, self.last_msg)
       return "I'm not sure what's going on!"
 
-   #updates the tables with stats 
+
    def update_db_stats(self, msg_id, user=False):
       """Updates the usage stats for a message in the db"""
       update_query = "UPDATE DATA_PHRASE_STATS SET"
+
       if user == True:
          self.user_use_stats[msg_id] = int(self.user_use_stats[msg_id]) + 1
-         update_query = update_query + " user_use = %s WHERE id = %s;" % (self.user_use_stats[msg_id], msg_id)
+         update_query = (update_query + " user_use = %s WHERE id = %s;" 
+                         % (self.user_use_stats[msg_id], msg_id))
       else: 
          self.gust_use_stats[msg_id] = int(self.gust_use_stats[msg_id]) + 1
-         update_query = update_query + " gust_use = %s WHERE id = %s;" % (self.gust_use_stats[msg_id], msg_id)
+         update_query = (update_query + " gust_use = %s WHERE id = %s;" 
+                         % (self.gust_use_stats[msg_id], msg_id))
 
       #push to db
-      self.db_conn.query(update_query)
+      self.db_conn.query(update_query, True)
       
+
+   def add_use_case(self, utterance_id):
+      """ Adds a use case of a phrase being said in response to utterance_id phrase. 
+      Updates DATA_CONVO_PAIRS and DATA_STATS
+      """
+      
+      if (self.last_msg != None and (self.last_msg != '1' 
+                                     or self.last_msg != '2'
+                                     or self.last_msg != '3'
+                                     or self.last_msg != '4'
+                                     or self.last_msg != '5')):
+         update_query = ("INSERT INTO DATA_CONVO_PAIRS ( utterance_id, response_id )"
+                         "VALUES (%s, %s);" % (self.last_msg, utterance_id))
+         try:
+            self.db_conn.query(update_query, True)
+         except sqlite3.IntegrityError:
+            pass
 
    def add_msg(self, filtered_msg, unfiltered_msg, utterance_id):
       """Adds a new message to the db and pairs it with the utterance_id"""
-      #filter msg
-      insert_statement = 'INSERT INTO DATA_PHRASES (orig_utterance, sani_utterance) VALUES'
+
+      print unfiltered_msg
       #insert into DATA_Phrases
+      insert_statement1 = ('INSERT INTO DATA_PHRASES (orig_utterance, sani_utterance) VALUES ("%s", "%s");'
+                           % (unfiltered_msg, filtered_msg))
+      self.db_conn.query(insert_statement1, True)
 
-      #insert into DATA_Convo_pairs
+      #get id
+      response_id = self.find_id(filtered_msg)
 
-
+      if response_id != None:
+         #insert into DATA_Convo_pairs
+         insert_statement2 = ('INSERT INTO DATA_CONVO_PAIRS (utterance_id, response_id) ' + 
+                              'VALUES (%s, %s);' %  (utterance_id, response_id))
+         self.db_conn.query(insert_statement2, True)
       #insert into DATA_stats
-      
+         insert_statement3 = ('INSERT INTO DATA_PHRASE_STATS (id, user_use, gust_use)' +
+                              'VALUES (%s, %s, %s);' % (response_id, "1", "0"))
+         self.db_conn.query(insert_statement3, True)
 
 
 def main():

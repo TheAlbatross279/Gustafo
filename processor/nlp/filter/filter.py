@@ -1,6 +1,7 @@
 """
 Filter superclass that contains method for normailizing and returns 
 full parse as a default action.
+@author Kim Paterson
 """
 
 import re
@@ -18,17 +19,16 @@ class Filter(object):
    def split_parse(self, msg):
        split_msg = self.normalize(msg)
        split_msg = split_msg.split(" ")
-       print split_msg
 
        return split_msg
 
    def full_parse(self, msg):
        return self.normalize(msg)
 
-   def main():
-       fil = Filter()
-       msg = fil.filter("Hello, ?!@#$%^&**$#@#$&*(^&, how?\"")
-       print msg
+def main():
+   fil = Filter()
+   msg = fil.filter("Hello, ?!@#$%^&**$#@#$&*(^&, how?\"")
+   print msg
         
-   if __name__ == "__main__":
-       main()
+if __name__ == "__main__":
+   main()

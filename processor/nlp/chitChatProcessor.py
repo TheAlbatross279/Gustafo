@@ -1,6 +1,7 @@
 """
 Handles communication between DB and ChitChat State by processing 
 messages and communicating with the db to find response.
+@author Kim Paterson
 """
 
 from processor.nlp.msgprocessor import MSGProcessor

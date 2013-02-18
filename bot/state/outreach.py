@@ -22,7 +22,7 @@ class InitialOutreach(OutreachState):
    def next_states():
       return tuple([SecondaryOutreach])
 
-State.register(InitialOutreach)
+#State.register(InitialOutreach)
 
 class OutreachResponse(OutreachState):
    @staticmethod

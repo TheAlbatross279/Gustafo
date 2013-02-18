@@ -13,6 +13,7 @@ class ChitChat(State):
         db_conn = SQLiteConn('db/ccie.db')
         query = "SELECT sani_utterance FROM DATA_PHRASES;"
         chat_phrases = db_conn.query(query)
+
         for phrase in chat_phrases:
             for entry in phrase:
                 words = entry.split(" ")
@@ -26,13 +27,12 @@ class ChitChat(State):
         confidence = 0
 
         string_msg = []
-        for (word, pos) in msg:
+        for word in msg:
             if word in ChitChat.chat_words:
                 confidence += ChitChat.chat_words[word]
                 string_msg.append(word)
-
-        string_msg = " ".join(string_msg)
-        return (confidence / float(len(msg)), {'msg': string_msg})
+        msg = " ".join(msg)
+        return (confidence / float(len(msg)), {'msg': msg})
         
     @staticmethod
     def respond(context):

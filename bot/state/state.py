@@ -1,5 +1,6 @@
 from multiprocessing import Pool, cpu_count
 from nltk import pos_tag, word_tokenize
+from processor.nlp.filter.normalTokFilter import NormalTokFilter
 
 def state_test((msg, state)):
    return (state.recognize(msg), state)
@@ -77,8 +78,9 @@ class State:
       '''
       #print msg
 
-      msg_tag = pos_tag(word_tokenize(msg))
-
+#      msg_tag = pos_tag(word_tokenize(msg))
+      msg_filter = NormalTokFilter()
+      msg_tag = msg_filter.filter(msg)
       current_state = State.user_state.get(nick, None)
       if current_state is None:
          valid_states = State.initial_states

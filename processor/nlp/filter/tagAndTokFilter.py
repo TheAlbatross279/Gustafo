@@ -1,6 +1,7 @@
 """
 Filter that tagges and tokenizes a given string using NLTK word_tokenize() 
 and pos_tag() filtering and returns a list of tuple tokens as the message 
+@author Kim Paterson
 """
 
 from filter import Filter

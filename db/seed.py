@@ -55,6 +55,6 @@ def insertUsage(usage_csv):
 
 if __name__ == "__main__":
     import sys
-#    insertPhrases(sys.argv[1])
+    insertPhrases(sys.argv[1])
 #    insertPairs(sys.argv[2])
-    insertUsage(sys.argv[1])
+#    insertUsage(sys.argv[3])
