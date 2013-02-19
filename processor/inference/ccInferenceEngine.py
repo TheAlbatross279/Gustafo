@@ -63,7 +63,6 @@ class CCInferenceEngine():
 
       Takes list of strings as input, returns a string.
       """
-      #print msg
       msg_id = self.find_id(msg)
       response = ""
       
@@ -156,10 +155,15 @@ class CCInferenceEngine():
       update_query = "UPDATE DATA_PHRASE_STATS SET"
 
       if user == True:
+         if msg_id not in self.user_use_stats:
+            self.user_use_stats[msg_id] = 0
          self.user_use_stats[msg_id] = int(self.user_use_stats[msg_id]) + 1
          update_query = (update_query + " user_use = %s WHERE id = %s;" 
                          % (self.user_use_stats[msg_id], msg_id))
       else: 
+         if msg_id not in self.gust_use_stats:
+            self.gust_use_stats[msg_id] = 0
+
          self.gust_use_stats[msg_id] = int(self.gust_use_stats[msg_id]) + 1
          update_query = (update_query + " gust_use = %s WHERE id = %s;" 
                          % (self.gust_use_stats[msg_id], msg_id))
