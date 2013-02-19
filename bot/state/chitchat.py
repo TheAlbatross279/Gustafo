@@ -38,6 +38,8 @@ class ChitChat(State):
     def respond(context):
         response = ChitChat.processor.respond(context['msg'])
         return response
+   
+
 
 State.register(ChitChat, True)
 

@@ -63,7 +63,7 @@ class CCInferenceEngine():
 
       Takes list of strings as input, returns a string.
       """
-      print msg
+      #print msg
       msg_id = self.find_id(msg)
       response = ""
       

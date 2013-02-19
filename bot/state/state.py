@@ -85,23 +85,31 @@ class State:
       if current_state is None:
          valid_states = State.initial_states
       else:
-         valid_states = current_state.next_states()
+         # Unclean method to make help states work correctly
+         if current_state.next_states():
+            valid_states = current_state.next_states()
+         else:
+            valid_states = State.initial_states
 
       #print current_state
-
+      #print 'valid',valid_states
+      #print 'current',current_state
 
       confidence = map(state_test, [(msg_tag, state) for state in State.states if State.validate_state(state, valid_states)])
 
       #print confidence
 
       ((conf, context), state) = reduce(lambda x, y: x if x[0][0] > y[0][0] else y, confidence)
+      #print 'state', state
 
       if conf < 0.1:
-         if not nick in State.user_state or State.user_state[nick] != State:
-            State.user_state[nick] = State
-            return State.query(nick, msg)
-         else:
-            return None
+         State.user_state[nick] = None
+         return None
+         #if not nick in State.user_state or State.user_state[nick] != State:
+         #   State.user_state[nick] = State
+         #   return State.query(nick, msg)
+         #else:
+         #   return None
 
       State.user_state[nick] = state
 
@@ -135,4 +143,4 @@ class State:
 
    @staticmethod
    def next_states():
-      return tuple([State])
+      return None

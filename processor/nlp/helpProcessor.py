@@ -4,13 +4,13 @@ messages and communicating with the db to find response.
 """
 
 from processor.nlp.msgprocessor import MSGProcessor
-from processor.inference import HInferenceEngine
+from processor.inference.hInferenceEngine import HInferenceEngine
 
 class HelpChatProcessor(MSGProcessor):
    def __init__(self, filter):
-      super.__init__(filter)
+      super(HelpChatProcessor, self).__init__(filter)
       self.HIE = HInferenceEngine()
       
-   def callInference(msg):
+   def call_inference(self, msg):
       return self.HIE.infer(msg)
       
