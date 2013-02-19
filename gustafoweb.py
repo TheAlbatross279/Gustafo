@@ -3,7 +3,7 @@
 import sys
 
 #import bot
-from gustafobot import GustafoBot
+from bot import Bot
 from adapters.webadapter import WebAdapter
 
 def main():
@@ -22,7 +22,7 @@ def main():
    else:
       port = 8080
 
-   bot = GustafoBot(WebAdapter(port))
+   bot = Bot(WebAdapter(port))
    bot.start()
 
 if __name__ == "__main__":
