@@ -1,10 +1,7 @@
 
 CREATE TABLE so_user (
     so_user VARCHAR(255) PRIMARY KEY,
-    reputation INTEGER,
-    gold_badge INTEGER,
-    silver_badge INTEGER,
-    bronze_badge INTEGER
+    reputation INTEGER
 );
 
 CREATE TABLE question (
@@ -25,6 +22,7 @@ CREATE TABLE answer (
     so_user VARCHAR(255) REFERENCES so_user,
     text VARCHAR(65535),
     rating INTEGER,
+    isAccepted BOOLEAN,
     time DATE
 );
 
