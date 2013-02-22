@@ -36,10 +36,11 @@ const (
 
 // Flags
 var (
-	Site       = stackexchange.StackOverflow
-	OAuthToken = ""
-	Tag        = ""
-	PerCall    = 50
+	Site          = stackexchange.StackOverflow
+	OAuthToken    = ""
+	Tag           = ""
+	PerCall       = 50
+	TimeToRevisit = 48 * time.Hour
 )
 
 // Connections
@@ -53,6 +54,7 @@ func main() {
 	flag.StringVar(&OAuthToken, "oauth", OAuthToken, "OAuth 2.0 token")
 	flag.StringVar(&Tag, "tag", Tag, "tag to scrape on")
 	flag.IntVar(&PerCall, "percall", PerCall, "# of questions to grab per heartbeat")
+	flag.DurationVar(&TimeToRevisit, "ttr", TimeToRevisit, "amount of time to wait before revisiting a question")
 	heartRate := flag.Duration("heartbeat", time.Minute, "time between scrapes for questions")
 	mongoURL := flag.String("mongo", "localhost/gustafocrawler", "the URL for the MongoDB database")
 	flag.Parse()
@@ -102,6 +104,7 @@ func main() {
 		if err := fetchBatch(); err != nil {
 			log.Println("batch failed:", err)
 		}
+		revisitQuestions()
 
 		select {
 		case <-heartbeat:
@@ -112,12 +115,12 @@ func main() {
 	}
 }
 
-func fetchBatch() error {
-	const (
-		questionIDKey = "question_id"
-		answerIDKey   = "answer_id"
-	)
+const (
+	questionIDKey = "question_id"
+	answerIDKey   = "answer_id"
+)
 
+func fetchBatch() error {
 	questions, err := fetchQuestions(50, Tag)
 	if err != nil {
 		return err
@@ -154,6 +157,48 @@ func fetchBatch() error {
 	return nil
 }
 
+func revisitQuestions() {
+	const timeRange = 3 * time.Minute
+	now := time.Now()
+	minTime, maxTime := now.Add(-TimeToRevisit-timeRange/2), now.Add(-TimeToRevisit+timeRange/2)
+	it := Mongo.C(QuestionCollection).Find(bson.M{"creation_date": bson.M{"$gt": minTime.Unix(), "$lt": maxTime.Unix()}}).Iter()
+	questionIDs := make([]int, 0)
+	for q := (bson.M{}); it.Next(&q); {
+		if qid, ok := q[questionIDKey].(float64); ok {
+			questionIDs = append(questionIDs, int(qid))
+		}
+	}
+	log.Printf("revisiting %d questions", len(questionIDs))
+
+	for _, qid := range questionIDs {
+		// Update question
+		if q, err := fetchQuestion(qid); err == nil {
+			q["_id"] = qid
+			if _, err := Mongo.C(QuestionCollection).UpsertId(qid, q); err != nil {
+				log.Printf("question (id=%d) upsert failed: %v", qid, err)
+			}
+		} else {
+			log.Printf("revisit question (id=%d) failed: %v", qid, err)
+		}
+
+		// Update answers
+		if answers, err := fetchQuestionAnswers([]int{qid}); err == nil {
+			for _, a := range answers {
+				if id, ok := getID(a, answerIDKey); ok {
+					a["_id"] = id
+					if _, err := Mongo.C(AnswerCollection).UpsertId(id, a); err != nil {
+						log.Printf("answer (id=%d) upsert failed: %v", id, err)
+					}
+				} else {
+					log.Println("answer has no ID")
+				}
+			}
+		} else {
+			log.Printf("revisit question answers (id=%d) failed: %v", qid, err)
+		}
+	}
+}
+
 func fetchQuestions(n int, tag string) ([]bson.M, error) {
 	var questions []bson.M
 	_, err := Client.Do(stackexchange.PathAllQuestions, &questions, &stackexchange.Params{
@@ -163,6 +208,16 @@ func fetchQuestions(n int, tag string) ([]bson.M, error) {
 		Filter:   AllQuestionsFilter,
 	})
 	return questions, err
+}
+
+func fetchQuestion(id int) (bson.M, error) {
+	var questions []bson.M
+	_, err := Client.Do(stackexchange.PathQuestions, &questions, &stackexchange.Params{
+		Site:     Site,
+		Args:     []string{stackexchange.JoinIDs([]int{id})},
+		Filter:   AllQuestionsFilter,
+	})
+	return questions[0], err
 }
 
 func fetchQuestionAnswers(ids []int) ([]bson.M, error) {
