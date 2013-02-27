@@ -27,5 +27,9 @@
 
     user = window.prompt("Pick a nickname:", user);
     $("#userName").text(user);
+    $('input[type="submit"]').attr("disabled", "1");
+    $.post("/", {"join": user}, function() {
+        $('input[type="submit"]').removeAttr("disabled");
+    });
     window.setInterval(refreshLog, 2000);
 })();
