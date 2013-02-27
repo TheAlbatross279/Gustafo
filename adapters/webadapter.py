@@ -90,7 +90,7 @@ class _LogResource(resource.Resource):
       del box[:]
       return boxCopy
 
-   def render_GET(self, request):
+   def render_POST(self, request):
       user_arg = request.args.get("user", [])
       if not user_arg:
          return error.NoResource()
