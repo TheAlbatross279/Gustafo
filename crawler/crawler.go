@@ -217,6 +217,9 @@ func fetchQuestion(id int) (bson.M, error) {
 		Args:     []string{stackexchange.JoinIDs([]int{id})},
 		Filter:   AllQuestionsFilter,
 	})
+	if len(questions) == 0 {
+		return nil, errors.New("no questions found")
+	}
 	return questions[0], err
 }
 
