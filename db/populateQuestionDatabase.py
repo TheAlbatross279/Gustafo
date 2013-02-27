@@ -44,7 +44,10 @@ def saveAnswerComments(comments, aid):
       
       curU = comment['owner']
       uname = curU['display_name']
-      uRep = 0
+      try:
+         uRep = curU['reputation']
+      except:
+         uRep = 0
 
       saveUser(uname, uRep)
 
@@ -63,7 +66,10 @@ def saveQuestionComments(comments, qid):
       
       curU = comment['owner']
       uname = curU['display_name']
-      uRep = 0
+      try:
+         uRep = curU['reputation']
+      except:
+         uRep = 0
 
       saveUser(uname, uRep)
 
@@ -119,7 +125,10 @@ for i in range(qNum):
    #Get the user and put the user in the database
    curU = curQ['owner']
    uname = curU['display_name']
-   uRep = 0#curU['reputation']
+   try:
+      uRep = curU['reputation']
+   except:
+      uRep = 0
 
    #Make sure the user exists
    saveUser(uname, uRep)
@@ -130,12 +139,13 @@ for i in range(qNum):
    editor = curQ['owner']['display_name']
    body = formatString(curQ['body']) 
    rating = curQ['up_vote_count']
+   viewCount = curQ['view_count']
    favorited = curQ['favorite_count'] 
    created = formatDate(curQ['creation_date'])
    edited = formatDate(curQ['last_activity_date'])
 
    #Save the question in the postgresDB
-   pgCur.execute("INSERT INTO question (qid, creator, editor, title, text, rating, favorited, created, edited) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)", (qid, creator, editor, title, body, rating, favorited, created, edited))
+   pgCur.execute("INSERT INTO question (qid, creator, editor, title, text, rating, num_views, favorited, created, edited) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (qid, creator, editor, title, body, rating, viewCount, favorited, created, edited))
 
    #Iterate over all question comments and persist them
    try:
@@ -158,7 +168,10 @@ for i in range(qNum):
       #Get the user and put the user in the database
       curU = curA['owner']
       uname = curU['display_name']
-      uRep = 0#curU['reputation']
+      try:
+         uRep = curU['reputation']
+      except:
+         uRep = 0
 
       #Pull all of the attributes off the answer
       aid = curA['answer_id'] 
@@ -171,7 +184,7 @@ for i in range(qNum):
       saveUser(uname, uRep)
 
       #Save the answer in the postgresDB
-      pgCur.execute("INSERT INTO answer (aid, qid, so_user, text, rating, isAccepted, time) VALUES (%s, %s, %s, %s, %s, %s, %s)", (aid, qid, user, body, rating, isAccepted, time))
+      pgCur.execute("INSERT INTO answer (aid, qid, so_user, text, rating, is_accepted, time) VALUES (%s, %s, %s, %s, %s, %s, %s)", (aid, qid, user, body, rating, isAccepted, time))
 
       try:
          comments = curA['comments']
@@ -182,5 +195,5 @@ for i in range(qNum):
 
    print str(i) + " Questions saved"
 
-#Commit to make sure everything is in the DB
-pconn.commit()
+   #Commit each question
+   pconn.commit()
