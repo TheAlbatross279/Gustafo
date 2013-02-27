@@ -42,7 +42,8 @@ class _Resource(resource.Resource):
       <div id="chatRecord"></div>
       <div id="inputLine">
          <form action="/" method="POST">
-            &gt; <input type="text" name="user" value="%s" size="10">:
+            <input type="hidden" name="user" value="%s" size="10">
+            &gt; <span id="userName">%s</span>:
             <input type="text" name="m" size="30">
             <input type="submit" value="Send">
          </form>
@@ -52,15 +53,21 @@ class _Resource(resource.Resource):
    <script type="text/javascript" src="/chat.js"></script>
 </body>
 </html>
-""" % (htmlescape(new_username))
+""" % (htmlescape(new_username), htmlescape(new_username))
 
    def render_POST(self, request):
-      user = request.args["user"][0]
-      line = request.args["m"][0]
-      self._log.add_message(user + ': ' + line)
-      self._adapter.bot.on_message(user, line)
-      request.setResponseCode(204)
-      return ""
+      if request.args.get("join"):
+         join_user = request.args["join"][0]
+         self._log.new_box(join_user)
+         self._adapter.bot.on_event(USER_JOIN, {'nick': join_user})
+         return ""
+      else:
+         user = request.args["user"][0]
+         line = request.args["m"][0]
+         self._log.add_message(user + ': ' + line)
+         self._adapter.bot.on_message(user, line)
+         request.setResponseCode(204)
+         return ""
 
 class _LogResource(resource.Resource):
    def __init__(self):
@@ -115,8 +122,6 @@ class WebAdapter(Adapter):
 
       # TODO(ross): stubbing
       #self.bot.on_event(JOIN)
-      # TODO(ross): We should be taking in user info
-      #self.bot.on_event(USER_JOIN, {'nick': 'user'})
 
       root = resource.Resource()
       root.putChild("", _Resource(self, self.logResource))
