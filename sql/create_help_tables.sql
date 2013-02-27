@@ -11,6 +11,7 @@ CREATE TABLE question (
     title VARCHAR(255),
     text VARCHAR(65535),
     rating INTEGER,
+    num_views INTEGER,
     favorited INTEGER,
     created DATE,
     edited DATE
@@ -22,7 +23,7 @@ CREATE TABLE answer (
     so_user VARCHAR(255) REFERENCES so_user,
     text VARCHAR(65535),
     rating INTEGER,
-    isAccepted BOOLEAN,
+    is_accepted BOOLEAN,
     time DATE
 );
 
