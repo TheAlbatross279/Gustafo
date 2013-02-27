@@ -18,7 +18,11 @@ class HelpConnection(Connection):
       Query the database.
       '''
       rtn = None
-      self.cursor.execute(query)
+      if isinstance(query, tuple):
+         self.cursor.execute(query[0], query[1])
+      else:
+         self.cursor.execute(query)
+      
       if commit:
          self.connection.commit()
       else:
