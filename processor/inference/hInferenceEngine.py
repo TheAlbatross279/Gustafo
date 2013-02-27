@@ -23,7 +23,7 @@ class HInferenceEngine():
       #Iterate over all keywords
       for keyword in msg:
          #Save all qids associated with the specified keyword
-         qids = self.dbConnection.query("SELECT question.qid FROM question WHERE question.title SIMILAR TO \'%" + keyword + "%\'")
+         qids = self.dbConnection.query(("SELECT question.qid FROM question WHERE question.title SIMILAR TO %s", ['%'+keyword+'%']))
          for qid in qids:
             try:
                qidDict[qid]
@@ -41,7 +41,7 @@ class HInferenceEngine():
             bestqid = val[0]
 
       #Find the answer associated with the best qid
-      answers = self.dbConnection.query("SELECT answer.text FROM answer WHERE answer.qid = \'" + str(bestqid) + "\'")
+      answers = self.dbConnection.query(("SELECT answer.text FROM answer WHERE answer.qid = %s", [str(bestqid)]))
 
       try:
          return answers[0]
