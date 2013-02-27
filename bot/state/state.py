@@ -94,8 +94,10 @@ class State:
       #print current_state
       #print 'valid',valid_states
       #print 'current',current_state
-
-      confidence = map(state_test, [(msg_tag, state) for state in State.states if State.validate_state(state, valid_states)])
+      if not valid_states:
+          return None
+      else:
+          confidence = map(state_test, [(msg_tag, state) for state in State.states if State.validate_state(state, valid_states)])
 
       #print confidence
 
