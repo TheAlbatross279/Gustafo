@@ -1,12 +1,9 @@
 (function() {
     var form = $("#inputLine > form");
-
-    function getUser() {
-        return $('input[name="user"]', form).val();
-    }
+    var user = $('input[name="user"]', form).val();
 
     function refreshLog() {
-        $.getJSON("/log?" + $.param({"user": getUser()}), function(data) {
+        $.getJSON("/log?" + $.param({"user": user}), function(data) {
             var chatRecord = $("#chatRecord");
             for (var i = 0; i < data.length; i++) {
                 chatRecord.append($('<div class="message">').text(data[i]));
@@ -22,11 +19,13 @@
         e.stopPropagation();
 
         var field = $('input[name="m"]', form);
-        $.post("/", {"m": field.val(), "user": getUser()}, function() {
+        $.post("/", {"m": field.val(), "user": user}, function() {
             refreshLog();
         });
         field.val("");
     });
 
+    user = window.prompt("Pick a nickname:", user);
+    $("#userName").text(user);
     window.setInterval(refreshLog, 2000);
 })();

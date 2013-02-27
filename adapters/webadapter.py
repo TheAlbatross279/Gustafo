@@ -42,7 +42,8 @@ class _Resource(resource.Resource):
       <div id="chatRecord"></div>
       <div id="inputLine">
          <form action="/" method="POST">
-            &gt; <input type="text" name="user" value="%s" size="10">:
+            <input type="hidden" name="user" value="%s" size="10">
+            &gt; <span id="userName">%s</span>:
             <input type="text" name="m" size="30">
             <input type="submit" value="Send">
          </form>
@@ -52,7 +53,7 @@ class _Resource(resource.Resource):
    <script type="text/javascript" src="/chat.js"></script>
 </body>
 </html>
-""" % (htmlescape(new_username))
+""" % (htmlescape(new_username), htmlescape(new_username))
 
    def render_POST(self, request):
       user = request.args["user"][0]
