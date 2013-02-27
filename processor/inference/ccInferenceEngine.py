@@ -2,10 +2,12 @@
 Retrieves appropriate response to query given as input for the chit-chat state.
 @author Kim Paterson
 """
+
 from db import SQLiteConn
 from operator import itemgetter
 from math import ceil 
 import sqlite3
+import random
 
 class CCInferenceEngine():
    def __init__(self):
@@ -78,6 +80,7 @@ class CCInferenceEngine():
 
    def find_id(self, msg):
       """Finds Id of phrase in db"""
+
       if msg in self.phrases_by_phrase.keys():
          return self.phrases_by_phrase[msg]
       else: 
@@ -97,16 +100,12 @@ class CCInferenceEngine():
          for response_id in responses: 
             response_u_stat[response_id] = self.user_use_stats[response_id]
 
-#         print response_u_stat
          #build list of valid responses and stats tuples sorted
          response_u_stat = sorted(response_u_stat.iteritems(), 
                                   key=lambda item: int(item[1]), reverse=True)
 
-#         print response_u_stat
-         
          #choose top 60% of user-used phrases, round up
          response_u_stat = response_u_stat[:int(ceil(len(response_u_stat) * (0.6)))]
-#         print response_u_stat
 
          response_id = response_u_stat[0][0]
          min_count = int(self.gust_use_stats[response_id])
@@ -117,14 +116,12 @@ class CCInferenceEngine():
                             int(self.gust_use_stats[res[0]])) for res in response_u_stat]
          #sort list by largest rank first
          ranked_results = sorted(ranked_results, key= lambda x: x[1], reverse= True)
-#         print self.phrases_by_id
 
          #choose the first element since it is the highest ranked response
          response_id = ranked_results[0][0]
 
          #find unsantized response and set as response
          response = self.phrases_unsani[response_id]
-#         print response
 
          #update db-stats
          self.update_db_stats(response_id)
@@ -143,11 +140,20 @@ class CCInferenceEngine():
 
    def gen_response(self, msg):
       """generates a new response"""
-      print msg
       #TODO fix this logic
       if self.last_msg != None:
          self.add_msg(msg, msg, self.last_msg)
-      return "I'm not sure what's going on!"
+
+      #find random response to go back with
+      phrases = ['I once got my head stuck in some railings...', 
+                 "I don't want to talk about that",
+                 "Let's talk about something else",
+                 "Can we move on?", 
+                 "Can we change the subject?",
+                 "Why?"]
+       
+      rand_ndx = random.randint(0, len(phrases)-1)
+      return phrases[rand_ndx]
 
 
    def update_db_stats(self, msg_id, user=False):
@@ -176,12 +182,15 @@ class CCInferenceEngine():
       """ Adds a use case of a phrase being said in response to utterance_id phrase. 
       Updates DATA_CONVO_PAIRS and DATA_STATS
       """
-      
+      print self.last_msg
       if (self.last_msg != None and (self.last_msg != '1' 
                                      or self.last_msg != '2'
                                      or self.last_msg != '3'
                                      or self.last_msg != '4'
                                      or self.last_msg != '5')):
+         print "IN UPDATE STATS"
+         print "last msg", self.last_msg
+         
          update_query = ("INSERT INTO DATA_CONVO_PAIRS ( utterance_id, response_id )"
                          "VALUES (%s, %s);" % (self.last_msg, utterance_id))
          try:
@@ -191,7 +200,7 @@ class CCInferenceEngine():
 
    def add_msg(self, filtered_msg, unfiltered_msg, utterance_id):
       """Adds a new message to the db and pairs it with the utterance_id"""
-
+      print "ALSO HERE"
       print unfiltered_msg
       #insert into DATA_Phrases
       insert_statement1 = ('INSERT INTO DATA_PHRASES (orig_utterance, sani_utterance) VALUES ("%s", "%s");'
@@ -200,13 +209,10 @@ class CCInferenceEngine():
 
       #get id
       response_id = self.find_id(filtered_msg)
-
+      print response_id
       if response_id != None:
-         #insert into DATA_Convo_pairs
-         insert_statement2 = ('INSERT INTO DATA_CONVO_PAIRS (utterance_id, response_id) ' + 
-                              'VALUES (%s, %s);' %  (utterance_id, response_id))
-         self.db_conn.query(insert_statement2, True)
-      #insert into DATA_stats
+         self.add_use_case(response_id)
+         #insert into DATA_stats
          insert_statement3 = ('INSERT INTO DATA_PHRASE_STATS (id, user_use, gust_use)' +
                               'VALUES (%s, %s, %s);' % (response_id, "1", "0"))
          self.db_conn.query(insert_statement3, True)
