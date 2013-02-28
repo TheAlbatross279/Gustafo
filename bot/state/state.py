@@ -76,7 +76,6 @@ class State:
       Query the valid states. This method will take in a message from the user and return the
       bot's response.
       '''
-      #print msg
 
 #      msg_tag = pos_tag(word_tokenize(msg))
       msg_filter = NormalTokFilter()

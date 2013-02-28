@@ -28,7 +28,6 @@ class Filter(object):
 def main():
    fil = Filter()
    msg = fil.filter("Hello, ?!@#$%^&**$#@#$&*(^&, how?\"")
-   print msg
         
 if __name__ == "__main__":
    main()

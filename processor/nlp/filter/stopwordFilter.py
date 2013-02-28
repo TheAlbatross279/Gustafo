@@ -16,4 +16,4 @@ class StopWordFilter(Filter):
 if __name__ == "__main__":
     s = StopWordFilter()
     f = s.filter(["my", "the", "hello"])
-    print f
+

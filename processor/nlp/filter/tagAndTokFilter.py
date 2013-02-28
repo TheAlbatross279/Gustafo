@@ -19,7 +19,7 @@ class TagAndTokFilter(Filter):
 def main():
    f = TagAndTokFilter()
    msg = f.filter("Hello, ?!@#$%^&**$#@#$&*(^&, how?\" are you?")
-   print msg
+
      
 if __name__ == '__main__':
    main()
