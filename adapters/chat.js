@@ -3,7 +3,7 @@
     var user = $('input[name="user"]', form).val();
 
     function refreshLog() {
-        $.getJSON("/log?" + $.param({"user": user}), function(data) {
+        $.post("/log", {"user": user}, function(data) {
             var chatRecord = $("#chatRecord");
             for (var i = 0; i < data.length; i++) {
                 chatRecord.append($('<div class="message">').text(data[i]));
@@ -11,7 +11,7 @@
             if (data.length > 0) {
                 chatRecord.scrollTop(chatRecord[0].scrollHeight);
             }
-        });
+        }, "json");
     }
 
     form.submit(function(e) {
