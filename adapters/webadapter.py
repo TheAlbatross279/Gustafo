@@ -44,7 +44,7 @@ class _Resource(resource.Resource):
          <form action="/" method="POST">
             <input type="hidden" name="user" value="%s" size="10">
             &gt; <span id="userName">%s</span>:
-            <input type="text" name="m" size="30">
+            <input type="text" name="m" size="30" x-webkit-speech>
             <input type="submit" value="Send">
          </form>
       </div>
