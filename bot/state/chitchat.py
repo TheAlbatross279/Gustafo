@@ -72,7 +72,7 @@ class ChitChat(State):
    
 
 
-State.register(ChitChat, True)
+#State.register(ChitChat, True)
 
 
         

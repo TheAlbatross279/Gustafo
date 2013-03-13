@@ -26,7 +26,7 @@ class HelpConnection(Connection):
       if commit:
          self.connection.commit()
       else:
-         rtn = self.cursor.fetchmany(100);
+         rtn = self.cursor.fetchmany(1000);
 
       return rtn
 
