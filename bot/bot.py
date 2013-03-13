@@ -1,5 +1,10 @@
 from state import *
 
+JOIN = 0x1
+DIE = 0x2
+USER_JOIN = 0x3
+USER_EXIT = 0x4
+
 class Bot(object):
    '''
    The Bot class holds all the pieces together and is in charge of passing messages between the
