@@ -1,5 +1,6 @@
 from db.psql import HelpConnection
 from processor.nlp.filter.normalTokFilter import NormalTokFilter
+import re
 
 class HInferenceEngine():
    def __init__(self):
@@ -29,7 +30,7 @@ class HInferenceEngine():
    takes list of strings as input, returns string
    """
    def infer(self, msg):
-      #qid = self.findBestQuestion(msg)
+      # qid = self.findBestQuestion(msg)
       qid = self.find_best_answer(msg)
       response = self.findAnswer(qid)
       return response
@@ -40,16 +41,22 @@ class HInferenceEngine():
       # answer text
       stripped = list(set(msg).difference(self.stop_words))
       qDict = dict()
-      q = 'select q.qid, q.creator, q.editor, q.title, q.text, q.rating, q.num_views, q.favorited, q.created, q.edited from question q where %s order by q.rating desc'
+      q = 'select q.qid, q.creator, q.editor, q.title, q.text, ' \
+          'q.rating, q.num_views, q.favorited, q.created, q.edited from question q where %s order by q.rating desc'
       q = q % ' or '.join(["q.title ilike '%%%s%%'" % k for k in stripped])
       qs = self.dbConnection.query(q)
       for qu in qs:
-         (qid, _, _, title, body, rating, num_views, favorited, _, _) = qu
+         (qid, creator, editor, answer, title, body, rating, num_views, favorited, created, edited) = qu
          rank = self.rankQuestion(qu, msg)
          qDict[qu] = (rank, qid)
       best = max(qDict.values(), key=lambda x: x[0])
       return best[1]
    
+   def get_body_score(self, body, keywords):
+       body_set = set(self.filt.filter(keywords).split()).difference(self.stop_words)
+       keyword_set = set(keywords).difference(self.stop_words)
+       return len(body_set.intersection(keyword_set))/float(len(body_set))
+
    def findBestQuestion(self, msg):
       qDict = {}
 
@@ -73,9 +80,13 @@ class HInferenceEngine():
       return best[1]
 
    def rankQuestion(self, question, msg):
-      (_, _, _, title, body, rating, num_views, favorited, _, _) = question
+      (qid, creator, editor, title, body, rating, num_views, favorited, created, edited) = question
       title = self.filt.filter(title)
       titleScore = self.title_weight * self.calcDist(title, msg)
+      viewScore = self.
+      body_score = self.get_body_score(body, msg) * self.body_weight
+      tag_score = None
+      rating_score = None
       rank = titleScore
       return rank
 
@@ -131,3 +142,4 @@ class HInferenceEngine():
          return answers[0]
       except:
          return "I could not find an answer"
+
