@@ -2,7 +2,6 @@
 Retrieves appropriate response to query given as input for the chit-chat state.
 @author Kim Paterson
 """
-#TODO REMOVE CACHED MEMORY
 
 from db import SQLiteConn
 from operator import itemgetter
