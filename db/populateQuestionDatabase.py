@@ -105,12 +105,13 @@ answers = db.answers
 
 #Get all questions from the mongo db
 allQuestions = questions.find({"is_answered":True})
-qNum = allQuestions.count()
+#qNum = allQuestions.count()
+i = 0
 
-for i in range(qNum):
+for curQ in allQuestions:
 
-   curQ = allQuestions.next()
-
+   #curQ = allQuestions.next()
+   i = i + 1
    #Retrieve the question id
    qid = curQ['question_id']
 
