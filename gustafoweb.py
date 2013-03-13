@@ -5,6 +5,13 @@ import sys
 #import bot
 from bot import Bot
 from adapters.webadapter import WebAdapter
+from random import randint
+
+class Beemo(Bot):
+   def on_event(self, event, data={}):
+      if event is USER_JOIN:
+         if randint(0, 1) is 1:
+            self.adapter.send_message(data['nick'], "Hello")
 
 def main():
    if len(sys.argv) != 2:
@@ -22,7 +29,7 @@ def main():
    else:
       port = 8080
 
-   bot = Bot(WebAdapter(port))
+   bot = Beemo(WebAdapter(port))
    bot.start()
 
 if __name__ == "__main__":
