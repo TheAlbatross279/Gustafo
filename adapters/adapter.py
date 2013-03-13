@@ -1,3 +1,8 @@
+JOIN = 0x1
+DIE = 0x2
+USER_JOIN = 0x3
+USER_EXIT = 0x4
+
 class Adapter(object):
    '''
    An adapter represents a connection to some sort of user-interface which can send and receive

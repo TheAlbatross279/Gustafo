@@ -14,10 +14,6 @@ __all__ = ['WebAdapter']
 
 # TODO(ross): Refactor event codes into bot/bot.py interface.
 #             Currently, GustafoBot is tightly coupled to IRCAdapter.
-JOIN = 0x1
-DIE = 0x2
-USER_JOIN = 0x3
-USER_EXIT = 0x4
 # END
 
 class _Resource(resource.Resource):
