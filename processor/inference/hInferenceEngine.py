@@ -33,7 +33,6 @@ class HInferenceEngine():
    takes list of strings as input, returns string
    """
    def infer(self, msg):
-      #qid = self.findBestQuestion(list(set(msg).difference(self.stop_words)))
       qid = self.find_best_answer(msg)
       response = self.findAnswer(qid)
       return response
@@ -44,7 +43,8 @@ class HInferenceEngine():
       # answer text
       stripped = list(set(msg).difference(self.stop_words))
       qDict = dict()
-      q = 'select q.qid, q.creator, q.editor, q.title, q.text, q.rating, q.num_views, q.favorited, q.created, q.edited from question q where %s order by q.rating desc'
+      q = 'select q.qid, q.creator, q.editor, q.title, q.text, ' \
+          'q.rating, q.num_views, q.favorited, q.created, q.edited from question q where %s order by q.rating desc'
       q = q % ' or '.join(["q.title ilike '%%%s%%'" % k for k in stripped])
       qs = self.dbConnection.query(q)
 
@@ -52,7 +52,7 @@ class HInferenceEngine():
       self.max_rating = float(qs[0][5])
 
       for qu in qs:
-         (qid, _, _, title, body, rating, num_views, favorited, _, _) = qu
+         (qid, creator, editor, title, body, rating, num_views, favorited, created, edited) = qu
          rank = self.rankQuestion(qu, msg)
          qDict[qu] = (rank, qid)
 
@@ -60,18 +60,29 @@ class HInferenceEngine():
       best = max(qDict.values(), key=lambda x: x[0])
       return best[1]
    
+   def get_body_score(self, body, keywords):
+       body_set = set(self.filt.filter(body)).difference(self.stop_words)
+       keyword_set = set(keywords).difference(self.stop_words)
+       return (len(body_set.intersection(keyword_set))/float(len(body_set))) * self.body_weight
+
    def rankQuestion(self, question, msg):
-      (_, _, _, title, body, rating, num_views, favorited, _, _) = question
+      (qid, creator, editor, title, body, rating, num_views, favorited, created, edited) = question
       title = self.filt.filter(title)
+
+      # Body score
+      body_score = self.get_body_score(body, msg)
+
       #Title score
       titleScore = self.getTitleScore(title, msg)
+
       #Views score
       viewScore = self.getViewScore(num_views)
+
       #Rank score
       ratingScore = self.getRatingScore(rating)
 
       #Sum the weights here
-      rank = titleScore + viewScore + ratingScore
+      rank = titleScore + viewScore + ratingScore + body_score
       
       return rank
 
@@ -114,3 +125,4 @@ class HInferenceEngine():
          return answers[0]
       except:
          return "I could not find an answer"
+
