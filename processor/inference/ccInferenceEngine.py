@@ -91,9 +91,12 @@ class CCInferenceEngine():
                  "Can we move on?", 
                  "Can we change the subject?",
                  "Why?"]
-       
-      rand_ndx = random.randint(0, len(phrases)-1)
-      return phrases[rand_ndx]
+      
+      responses = self.db_conn.query("SELECT id, orig_utterance from DATA_PHRASES WHERE sani_utterance like 'what%'")
+
+      rand_ndx = random.randint(0, len(responses) - 1)
+      self.last_msg = str(responses[rand_ndx][0])
+      return responses[rand_ndx][1]
 
 
    def update_db_stats(self, msg_id, user=False):
