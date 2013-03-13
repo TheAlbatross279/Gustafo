@@ -27,7 +27,7 @@ class ProcessLogs():
             filt_msg = " ".join(filt.filter(msg))
             temp = (msg.strip(), filt_msg.strip())
             message_pairs.append(temp)
-            print temp
+#            print temp
         return message_pairs
 
     def add_to_db(self, msg_pairs):
@@ -38,19 +38,29 @@ class ProcessLogs():
         for msg_p in msg_pairs:
             insert_statement1 = ('INSERT INTO DATA_PHRASES (orig_utterance, sani_utterance) VALUES ("%s", "%s");'
                                  % (msg_p[0], msg_p[1]))
-            db_conn.query(insert_statement1, True)
+            try:
+                db_conn.query(insert_statement1, True)
+            except sqlite3.IntegrityError:
+                pass
+
             #print insert_statement1
 
             query = ("SELECT id FROM DATA_PHRASES WHERE sani_utterance = '"  + msg_p[1] + "';")
-            result = db_conn.query(query)
+
+            results = None
+            try:
+                result = db_conn.query(query)
+            except sqlite3.IntegrityError:
+                pass
+
 
             if result:
                 ids.append((result[0][0], msg_p[1]))
 
-        print ids
+#        print ids
 
         for x in range(len(msg_pairs)-1):
-            print ids[x], ids[x+1]
+#            print ids[x], ids[x+1]
 
             update_query = ("INSERT INTO DATA_CONVO_PAIRS ( utterance_id, response_id )"
                                 " VALUES (%s, '%s');" % (ids[x][0], ids[x+1][0]))
@@ -62,9 +72,9 @@ class ProcessLogs():
 
 
 def main(file):
-    print file
+#    print file
     pl = ProcessLogs()
     messages = pl.process(file)
-    print messages
+#    print messages
     pairs = pl.filter_msgs(messages)
     pl.add_to_db(pairs)
