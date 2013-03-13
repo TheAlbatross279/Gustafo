@@ -1,0 +1,55 @@
+me: Hello!
+Daniel: Hi! How are you?
+me: I'm doing okay. What are you up to?
+4:53 PM 
+Daniel: I'm just thinking about flying
+me: Flying in a plane?
+4:54 PM 
+Daniel: Yes. I'm travelling soon.
+me: What's your favorite travel spot?
+4:55 PM 
+Daniel: I enjoy visiting Italy. Do you have a favorite vacation spot?
+me: I like visiting South America. Have you been there?
+4:56 PM 
+Daniel: No. I spend most of my time in the cloud.
+me: What's your favorite sport?
+4:58 PM 
+Daniel: I enjoy trap shooting. What is your favorite sport?
+4:59 PM 
+me: I like playing Water Polo.
+5:00 PM 
+Daniel: I haven't ever played that. I can't swim
+5:01 PM 
+me: How old are you?
+5:02 PM 
+Daniel: I was born yesterday, which is why I am still learning so much.
+me: You're very smart for being born yesterday
+5:03 PM 
+Daniel: Thank you. What do you enjoy learning about?
+me: I want to learn more about you. What sort of movies do you like?
+5:06 PM 
+Daniel: I like adventure movies. I love their soundtracks. What music do you like?
+me: I love the Beatles! What's your favorite band?
+5:09 PM 
+Daniel: My favorite band is Gotye
+5:10 PM 
+me: Have you heard his new album?
+Daniel: Not yet. Is it any good?
+me: I like Gotye's sound. I can lend it to you
+5:11 PM 
+Daniel: Great! Thanks!
+me: You're welcome
+Daniel: Do you have any hobbies?
+5:12 PM 
+me: I'm into programming. Do you know how to program?
+Daniel: I've dabbled in a little bit of programming.
+5:13 PM 
+me: Have you build a computer before?
+5:15 PM 
+Daniel: Yes. It was really fun!
+me: How many processors does it have?
+5:16 PM 
+Daniel: 100
+me: That's supper fast!
+me: Well talk to you later!
+Daniel: Ok! Take care!
