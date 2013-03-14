@@ -12,10 +12,6 @@ from adapter import *
 
 __all__ = ['WebAdapter']
 
-# TODO(ross): Refactor event codes into bot/bot.py interface.
-#             Currently, GustafoBot is tightly coupled to IRCAdapter.
-# END
-
 class _Resource(resource.Resource):
    def __init__(self, adapter, log):
       resource.Resource.__init__(self)
@@ -126,6 +122,8 @@ class WebAdapter(Adapter):
          root.putChild(name, _StaticResource(name, 'text/javascript'))
       for name in ['style.css']:
          root.putChild(name, _StaticResource(name, 'text/css'))
+      for name in ['logo.png']:
+         root.putChild(name, _StaticResource(name, 'image/png'))
       site = server.Site(root)
 
       from twisted.internet import reactor
