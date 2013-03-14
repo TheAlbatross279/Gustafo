@@ -131,7 +131,6 @@ class WebAdapter(Adapter):
       reactor.run()
 
    def send_message(self, nick, msg):
-      print msg
       self.logResource.add_message(msg)
 
    def get_users(self):
