@@ -4,6 +4,7 @@ import sys
 
 #import bot
 from bot import Bot
+from adapters.adapter import USER_JOIN
 from adapters.webadapter import WebAdapter
 from random import randint
 
